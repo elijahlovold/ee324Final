@@ -17,5 +17,6 @@ Target is snake game with extra features including portals, teleporting fruit, a
          
 
 # Block diagram
-![block diagram.] (/vivado/shared_source/elijah_block.png)
+![block diagram.](/vivado/shared_source/elijah_block.png)
+
 Note, our local projects are excluded from the repo. Thus, make sure as many source files are in the shared_sources folder as possible. 
