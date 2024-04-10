@@ -1,0 +1,14 @@
+; colors:
+; 	color 0: ( R:0x0, G:0x0, B:0x0, A:0x0 )
+; 	color 1: ( R:0xbd, G:0x39, B:0x2b, A:0xff )
+; 	color 2: ( R:0x8d, G:0x78, B:0x5a, A:0xff )
+; 	color 3: ( R:0xf9, G:0xc9, B:0xa6, A:0xff )
+; 	color 4: ( R:0xf1, G:0xc4, B:0xf, A:0xff )
+;
+; bits per pixel: 3
+; image width: 12 pixels -> 4 bits
+; image height: 17 pixels -> 5 bits
+; ROM width: 48
+; ROM depth: 17
+memory_initialization_radix=16;
+memory_initialization_vector=001249000000 009249248000 0124DA600000 09A6DA6D8000 09A4DB4DB000 0936DA490000 0036DB6C0000 012292000000 092291490000 492249492000 6D184C29B000 6D92492DB000 6C924925B000 009249240000 009201240000 092000490000 492000492000 ;
