@@ -31,8 +31,11 @@ module pixel_gen_temp #(parameter  WIDTH=1920, HEIGHT=1080,
     assign offset_y = (vde ? (y - V_SYNC_TIME + V_B_PORCH + V_LR_BORDER): 0); 
 
     // next, flatten 2d coords to current_tile
-    // how does the division round?...
-    assign current_tile = (offset_x/(SPRITE_SIZE*TILES_PER_REG) + N_PER_ROW*(offset_y/(SPRITE_SIZE)));
+    wire [8:0] x_tile, y_tile;
+    assign x_tile = offset_x/(SPRITE_SIZE*TILES_PER_REG);
+    assign y_tile = N_PER_ROW*(offset_y/(SPRITE_SIZE));
+
+    assign current_tile = x_tile + y_tile;
 
     // output block
     always @(*) begin 
