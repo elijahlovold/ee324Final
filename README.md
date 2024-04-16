@@ -17,9 +17,10 @@ Target is snake game with extra features including portals, teleporting fruit, a
          
 
 ## Sprites
-        • Head: UpHead, DownHead, LeftHead, RightHead
+        • Head: UpHead, DownHead, LeftHead, RightHead, TurnRight, TurnLeft, TurnUp, TurnDown, HeadIntoPortal1 (4 angles), HeadOutPortal2 (4 angles)
         • Body: TurnUp, TurnDown, TurnLeft, TurnRight, VerticalTravel, HorizontalTravel
-        • Tail: UpTail, DownTail, LeftTail, RightTail
+        • Tail: UpTail, DownTail, LeftTail, RightTail, TurnRight, TurnLeft, TurnUp, TurnDown
+        • Gameplay Sprites: Food, Portal1, Portal2, (Potential Powerups?)
 
 # Block diagram
 ![block diagram.](/vivado/shared_source/elijah_block_diagram.png)
