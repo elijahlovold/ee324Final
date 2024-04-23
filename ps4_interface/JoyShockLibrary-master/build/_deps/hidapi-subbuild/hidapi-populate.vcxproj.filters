@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\9b5b6fcee31a0615e519b2b068d4b06f\hidapi-populate-mkdir.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\9b5b6fcee31a0615e519b2b068d4b06f\hidapi-populate-download.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\9b5b6fcee31a0615e519b2b068d4b06f\hidapi-populate-update.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\9b5b6fcee31a0615e519b2b068d4b06f\hidapi-populate-patch.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\9b5b6fcee31a0615e519b2b068d4b06f\hidapi-populate-configure.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\9b5b6fcee31a0615e519b2b068d4b06f\hidapi-populate-build.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\9b5b6fcee31a0615e519b2b068d4b06f\hidapi-populate-install.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\9b5b6fcee31a0615e519b2b068d4b06f\hidapi-populate-test.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\6240ec37c36438fe2cc3d190dd46db54\hidapi-populate-complete.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\5ff54ef4e957c6369b14b071c77287e2\hidapi-populate.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\build\_deps\hidapi-subbuild\CMakeFiles\hidapi-populate" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{B8534E93-2989-30D6-B3B9-6AD431BC7C57}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

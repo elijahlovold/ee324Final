@@ -3,6 +3,7 @@
 #include "presets.hpp"
 #include "input_controller.hpp"
 #include "grid_controller.hpp"
+#include "portal.hpp"
 
 class snake_node {
     public: 
@@ -22,7 +23,8 @@ class snake_node {
 
 bool snake_node::set_coords(unsigned int x, unsigned int y, bool check_collision) {
     // everytime we move the snake, we must first clear the current sprite
-    grid_controller::set_sprite(this->coord_x, this->coord_y);
+    sp temp = sp::TRANSPARENT;
+    grid_controller::set_sprite(this->coord_x, this->coord_y, temp);
 
     if (x > MAX_X_COORDS || y > MAX_Y_COORDS) {
         return false;
@@ -64,8 +66,8 @@ snake_node::snake_node(sp sprite, unsigned int x, unsigned int y) {
 
 class Snake {
     public:
-        unsigned int head_i = 0;
-        unsigned int tail_i = snake_length - 1;
+        unsigned int head_i;
+        unsigned int tail_i;
 
         unsigned int snake_length;
         std::vector<snake_node> snake;
@@ -81,9 +83,12 @@ class Snake {
         void add_segment();
 
         void read_inputs();
+
+        portal sender;
+        portal reciever; 
 };
 
-Snake::Snake(unsigned int length) : snake_length(snake_length) {
+Snake::Snake(unsigned int length) : snake_length(length), head_i(0), tail_i(length-1), sender(sp::PORTALS), reciever(sp::PORTALR) {
     // first, set direction to right
     this->set_direction(dir::RIGHT);
 
@@ -95,18 +100,21 @@ Snake::Snake(unsigned int length) : snake_length(snake_length) {
 
     // set the snake in the middle of the map
     this->reset_snake();
-
+    
+    // link the portals
+    this->sender.set_corresponding(&reciever);
+    this->reciever.set_corresponding(&sender);
 }
 
 // reset the snake to the initial conditions
 void Snake::reset_snake(int head_x, int head_y) {
     this->snake[this->head_i].set_coords(head_x, head_y);
     if (this->head_direction == dir::RIGHT || this->head_direction == dir::LEFT) {
-        for (int i = 0; i < snake_length - 1; i++) {
+        for (unsigned int i = 0; i < this->snake_length - 1; i++) {
             this->snake[i].set_coords(head_x + this->head_direction*i, head_y);
         }
     } else {
-        for (int i = 0; i < snake_length - 1; i++) {
+        for (unsigned int i = 0; i < this->snake_length - 1; i++) {
             this->snake[i].set_coords(head_x, head_y + this->head_direction*i);
         }
     }
@@ -136,7 +144,7 @@ bool Snake::step_snake() {
     }
 
     // next, loop through the snake updating coords
-    for (int i = 1; i < snake_length; i++) {
+    for (unsigned int i = 1; i < this->snake_length; i++) {
         // save current coords
         prev_x_temp = this->snake[i].get_coords(0);
         prev_y_temp = this->snake[i].get_coords(1);
@@ -146,6 +154,8 @@ bool Snake::step_snake() {
         prev_x = prev_x_temp;
         prev_y = prev_y_temp;
     }
+
+    return true;
 }
 
 void Snake::add_segment() {
@@ -176,25 +186,27 @@ void Snake::add_segment() {
 }
 
 void Snake::read_inputs() {
-    unsigned int raw_cmds = input_controller::read_raw_inputs();
 
-    if (input_controller::check_input(raw_cmds, inputs::UP_I)) {
+    if (input_controller::read_input(inputs::UP_I)) {
         this->set_direction(dir::UP);
-    } else if (input_controller::check_input(raw_cmds, inputs::DOWN_I)) {
+    } else if (input_controller::read_input(inputs::DOWN_I)) {
         this->set_direction(dir::DOWN);
-    } else if (input_controller::check_input(raw_cmds, inputs::RIGHT_I)) {
+    } else if (input_controller::read_input(inputs::RIGHT_I)) {
         this->set_direction(dir::RIGHT);
-    } else if (input_controller::check_input(raw_cmds, inputs::LEFT_I)) {
+    } else if (input_controller::read_input(inputs::LEFT_I)) {
         this->set_direction(dir::LEFT);
     }
 
-    if (input_controller::check_input(raw_cmds, inputs::PORTAL1)) {
+    if (input_controller::read_input(inputs::PORTAL1)) {
         // TODO: implement portal control
-    } else if (input_controller::check_input(raw_cmds, inputs::PORTAL2)) {
+        
+    } else if (input_controller::read_input(inputs::PORTAL2)) {
         // TODO: implement portal control
+    } else {
+        // TODO: reset portal recharge
     }
 
-    if (input_controller::check_input(raw_cmds, inputs::BOOST)) {
+    if (input_controller::read_input(inputs::BOOST)) {
         // TODO: implement boost control
     }
 }

@@ -6,8 +6,7 @@
 #include <iostream>
 
 namespace grid_controller {
-
-    bool set_sprite(unsigned int x, unsigned int y, sp sprite_addr = sp::TRANSPARENT, bool check_collision = false); 
+    bool set_sprite(unsigned int x, unsigned int y, sp &sprite_addr, bool check_collision = false); 
     unsigned int flatten_coords(unsigned int x, unsigned int y);
 
     void clear_grid(sp addr = sp::TRANSPARENT);
@@ -15,7 +14,7 @@ namespace grid_controller {
     void load_map(mp_i map_index);
 
     // if check_collision, will return true if collision detected
-    bool set_sprite(unsigned int x, unsigned int y, sp sprite_addr, bool check_collision) { 
+    bool set_sprite(unsigned int x, unsigned int y, sp &sprite_addr, bool check_collision) { 
         unsigned int flat_coords = flatten_coords(x, y);    
         
         // first grab the offset
@@ -30,10 +29,15 @@ namespace grid_controller {
         unsigned int byte_position = (flat_coords % 4)*8;
 
         // if check_collision and not clearing, first see if a non-transparent sprite is there... 
-        if (check_collision && sprite_addr != sp::TRANSPARENT) {
+        if (check_collision && (sprite_addr != sp::TRANSPARENT)) {
             unsigned char existing_sprite = 0xFF & (sprite >> byte_position);
             if (existing_sprite != static_cast<unsigned char>(sp::TRANSPARENT)) {
-                return 1;
+                
+                // if collided, set the sprite_addr to the tile we collided with 
+                // this allows the user to see what object was there
+                sprite_addr = static_cast<sp>(existing_sprite);
+
+                return true;
             }
         }
 
@@ -47,15 +51,15 @@ namespace grid_controller {
         // store the sprite_addr back into the register... 
         *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + offset)) = sprite;
 
-        return 0;
+        return false;
     }
 
-    unsigned int grid_controller::flatten_coords(unsigned int x, unsigned int y) {
+    unsigned int flatten_coords(unsigned int x, unsigned int y) {
         return y*MAX_X_COORDS + x;
     }
 
     // completely wipe the grid
-    void grid_controller::clear_grid(sp addr){
+    void clear_grid(sp addr){
         for (int x = 0; x < MAX_X_COORDS; x++) {
             for (int y = 0; y < MAX_Y_COORDS; y++) {
                 set_sprite(x, y, addr);
@@ -63,7 +67,7 @@ namespace grid_controller {
         }
     }
 
-    void grid_controller::load_map(mp_i map_index) {
+    void load_map(mp_i map_index) {
 
     }
 

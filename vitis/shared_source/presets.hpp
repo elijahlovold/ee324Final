@@ -6,9 +6,10 @@
 #include <vector>
 #include <time.h>
 
-#define GRID_CONTROLLER_BASE_ADDR 0x41230000
-#define INPUT_CONTROLLER_BASE_ADDR 0x41240000
+#define GRID_CONTROLLER_BASE_ADDR 0x43C00000
+#define INPUT_CONTROLLER_BASE_ADDR 0x43C10000
 // #define TIMER_BASE_ADDR 0x41250000
+#define UART_BASE_ADDR 0xE0001000
 
 #define MAX_SPRITE_ADDR 45
 
@@ -24,12 +25,24 @@
 enum sp {
     TRANSPARENT = 0,
     BK = 1, 
-    WALL = 2, 
-    ARCH = 3, 
+    // WALL = 2, 
+    // ARCH = 3, 
 
-    HEAD = 20,
-    TAIL = 21, 
-    BODY = 22,
+    // PORTALS = 10, // sending portal 
+    // PORTALR = 11, // recieving portal
+
+    // HEAD = 20,
+    // TAIL = 21, 
+    // BODY = 22,
+    WALL = 1, 
+    ARCH = 1, 
+
+    PORTALS = 1, // sending portal 
+    PORTALR = 1, // recieving portal
+
+    HEAD = 1,
+    TAIL = 1, 
+    BODY = 1,
 };
 
 enum dir {
@@ -40,18 +53,27 @@ enum dir {
 };
 
 enum inputs {
-    NONE = 0,
-
-    UP_I = 1, 
-    DOWN_I = 2, 
-    RIGHT_I = 3, 
-    LEFT_I = 4, 
+    UP_I = 0, 
+    DOWN_I = 1, 
+    RIGHT_I = 2, 
+    LEFT_I = 3, 
 
     PORTAL1 = 10,
     PORTAL2 = 11, 
     BOOST = 12, 
 
 };
+
+// enum portal_type {
+//     SENDER1 = 0, 
+//     RECIEVER1 = 1, 
+
+//     SENDER2 = 2, 
+//     RECIEVER2 = 3, 
+
+//     SENDER3 = 4, 
+//     RECIEVER3 = 5, 
+// };
 
 enum mp_i {
     LVL1 = 0,

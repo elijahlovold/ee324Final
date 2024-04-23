@@ -19,14 +19,24 @@ namespace input_controller {
     //     return commands;
     // } 
 
-    bool check_input(unsigned int commands, inputs cntr) {
-        unsigned int index = static_cast<unsigned int>(cntr);
-        unsigned int mask = 1 << index;
+    // // depreicated... 
+    // bool check_input(unsigned int commands, inputs cntr) {
+    //     unsigned int index = static_cast<unsigned int>(cntr);
+    //     unsigned int mask = 1 << index;
         
-        return (commands & mask) != 0;
+    //     return (commands & mask) != 0;
+    // }
+
+    unsigned int read_raw_inputs(unsigned int index = 0) {
+        unsigned int offset = 4*index;
+        return *((unsigned int *)(INPUT_CONTROLLER_BASE_ADDR + offset));
     }
 
-    unsigned int read_raw_inputs() {
-        return *((unsigned int *)(INPUT_CONTROLLER_BASE_ADDR));
+    bool read_input(inputs cntr_i) {
+        unsigned int index = static_cast<unsigned int>(cntr_i); 
+
+        unsigned int value = read_raw_inputs(index);     
+
+        return (value & 1);
     }
 };

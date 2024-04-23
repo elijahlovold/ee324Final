@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\JoyShockLibrary\JoyShockLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\JoyShockLibrary\JoyShockLibrary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\elija\OneDriveWSU\EE324\Labs\finalProject\ps4_interface\JoyShockLibrary-master\JoyShockLibrary\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{D9E3E4F8-43EE-326A-9173-FFA325F9689C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{754B3E1C-AF53-37FE-A4DF-BD14EF15ECAF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -16,7 +16,7 @@
 	(
 		// Users to add ports here
         input wire [8:0] current_tile,  // 9 bit number to get 324 values
-        output wire [31:0] sprite_addr,
+        output wire [7:0] sprite_addr,
         
 		// User ports ends
 		// Do not modify the ports beyond this line

@@ -1,0 +1,3 @@
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/hidapi-populate.dir
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/ALL_BUILD.dir
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/ZERO_CHECK.dir
