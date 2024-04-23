@@ -1,0 +1,14 @@
+# Target labels
+ hidapi-populate
+# Source files and their labels
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/hidapi-populate
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/5ff54ef4e957c6369b14b071c77287e2/hidapi-populate.rule
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/6240ec37c36438fe2cc3d190dd46db54/hidapi-populate-complete.rule
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/9b5b6fcee31a0615e519b2b068d4b06f/hidapi-populate-build.rule
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/9b5b6fcee31a0615e519b2b068d4b06f/hidapi-populate-configure.rule
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/9b5b6fcee31a0615e519b2b068d4b06f/hidapi-populate-download.rule
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/9b5b6fcee31a0615e519b2b068d4b06f/hidapi-populate-install.rule
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/9b5b6fcee31a0615e519b2b068d4b06f/hidapi-populate-mkdir.rule
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/9b5b6fcee31a0615e519b2b068d4b06f/hidapi-populate-patch.rule
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/9b5b6fcee31a0615e519b2b068d4b06f/hidapi-populate-test.rule
+C:/Users/elija/OneDriveWSU/EE324/Labs/finalProject/ps4_interface/JoyShockLibrary-master/build/_deps/hidapi-subbuild/CMakeFiles/9b5b6fcee31a0615e519b2b068d4b06f/hidapi-populate-update.rule

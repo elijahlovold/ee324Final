@@ -17,7 +17,7 @@ module VGA #(parameter  WIDTH=1920, HEIGHT=1080,
                         H_B_PORCH = 148, V_B_PORCH = 36,
                         H_LR_BORDER = 0, V_LR_BORDER = 0
                         ) (
-    output HS, VS, Vde, [15:0] x, y,
+    output HS, VS, Vde, [11:0] x, y,
     input clk, rst
     );
 
