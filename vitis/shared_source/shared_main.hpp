@@ -14,11 +14,13 @@
 int shared_main() {    
     while (1) {
         // // first, clear the grid
-        // grid_controller::clear_grid();
+        grid_controller::clear_grid(sp::TRANSPARENT);
 
-        for (unsigned int i = 0; i < 1296; i += 4) {
-            *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + i)) = 0x00010101;
-        }
+        *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 4*9)) = 0x00000001;
+        // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 9*4)) = 0x00000101;
+
+        // sp temp = sp::BODY;
+        // grid_controller::set_sprite(4, 4, temp);
 
         // first, instantiate a snake object
         // will create in the center of the screen
