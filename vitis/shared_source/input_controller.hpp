@@ -29,7 +29,8 @@ namespace input_controller {
 
     unsigned int read_raw_inputs(unsigned int index = 0) {
         unsigned int offset = 4*index;
-        return *((unsigned int *)(INPUT_CONTROLLER_BASE_ADDR + offset));
+        // return *((unsigned int *)(INPUT_CONTROLLER_BASE_ADDR + offset));
+        return 0;
     }
 
     bool read_input(inputs cntr_i) {

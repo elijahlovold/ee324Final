@@ -32,6 +32,19 @@ namespace uart {
         *((unsigned int *)(UART_BASE_ADDR + 0x30)) = message;
     }
 
+	unsigned char read_char_UART1() {
+
+		// poll the FIFO until data arrives	
+		unsigned int data_check;
+		do {
+			// FIFO recieve buffer empty status, bit 1 equals 1 when empty
+			data_check = *((unsigned int *)(UART_BASE_ADDR + 0x2C));
+			data_check &= 0b10;
+			usleep(100);
+		} while (data_check != 0);
+
+		return *((unsigned int *)(UART_BASE_ADDR + 0x30));
+	}
 };
 
 /*

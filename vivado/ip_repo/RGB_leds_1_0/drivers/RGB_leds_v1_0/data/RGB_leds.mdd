@@ -1,0 +1,10 @@
+
+
+OPTION psf_version = 2.1;
+
+BEGIN DRIVER RGB_leds
+	OPTION supported_peripherals = (RGB_leds);
+	OPTION copyfiles = all;
+	OPTION VERSION = 1.0;
+	OPTION NAME = RGB_leds;
+END DRIVER

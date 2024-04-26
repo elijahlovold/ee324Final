@@ -6,8 +6,48 @@
 #include <vector>
 #include <time.h>
 
-#define GRID_CONTROLLER_BASE_ADDR 0x43C20000
-#define INPUT_CONTROLLER_BASE_ADDR 0x43C10000
+#define PERIOD 1000     // sets the period of the PWM
+
+#define GRID_CONTROLLER_BASE_ADDR 0x43C30000
+
+// depricated, don't use
+// #define INPUT_CONTROLLER_BASE_ADDR 0x43C40000
+
+#define BUTTONS_BASEADDR 0x41200000		// Base address of the Buttons 
+#define LED_BASEADDR     0x41210000		// Base address of LED IP
+#define SWITCH_BASEADDR  0x41220000		// Base address of the Switches 						
+#define SVN_SEG_CNTL     0x43C10000		// Base address of the Seven-Segment Display Control 	
+#define SVN_SEG_DATA     0x43C10004		// Base address of the Seven-Segment Display Data
+
+// RGB addresses for LED #10 and #11
+#define B_0_EN 		0x43C00000
+#define B_0_PERIOD  0x43C00004
+#define B_0_WIDTH 	0x43C00008
+
+#define G_0_EN 		0x43C00010
+#define G_0_PERIOD  0x43C00014
+#define G_0_WIDTH 	0x43C00018
+
+#define R_0_EN 		0x43C00020
+#define R_0_PERIOD  0x43C00024
+#define R_0_WIDTH 	0x43C00028
+
+#define B_1_EN 		0x43C00030
+#define B_1_PERIOD  0x43C00034
+#define B_1_WIDTH 	0x43C00038
+
+#define G_1_EN 		0x43C00040
+#define G_1_PERIOD  0x43C00044
+#define G_1_WIDTH 	0x43C00048
+
+#define R_1_EN 		0x43C00050
+#define R_1_PERIOD  0x43C00054
+#define R_1_WIDTH 	0x43C00058
+
+
+
+#define GTC_BASE_ADDR 0xF8F00000
+
 // #define TIMER_BASE_ADDR 0x41250000
 #define UART_BASE_ADDR 0xE0001000
 
@@ -17,8 +57,8 @@
 #define Y_RES 1080
 #define SPRITE_RES 32
 
-#define MAX_X_COORDS 60
-#define MAX_Y_COORDS 33
+#define MAX_X_COORDS 64
+#define MAX_Y_COORDS 32
 
 #define SNAKE_LENGTH 5
 
@@ -40,16 +80,30 @@ enum sp {
     PORTALS = 1, // sending portal 
     PORTALR = 1, // recieving portal
 
-    HEAD = 1,
-    TAIL = 1, 
-    BODY = 1,
+    HEAD = 0,
+    HEAD_TURN = 1,
+    BODY = 2,
+    BODY_TURN = 3, 
+    TAIL = 4,
+    TAIL_TURN = 5,
+    ERROR = 999,
 };
 
+enum dir_big {
+    UP = 0, 
+    DOWN = 1, 
+    RIGHT = 2, 
+    LEFT = 3
+}; 
+
 enum dir {
-    RIGHT = 1,
-    LEFT = -1,
-    UP = 1, 
-    DOWN = -1,
+    HORI = 0,
+    VERT = 1
+};
+
+enum inc {
+    POS = 1,
+    NEG = -1, 
 };
 
 enum inputs {

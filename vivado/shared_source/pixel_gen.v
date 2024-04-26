@@ -19,23 +19,39 @@ module pixel_gen_temp #(parameter  WIDTH=1920, HEIGHT=1080,
     input [31:0] sprite_addr, // to choose sprite from this file
     input clk,
     output reg [7:0] R, G, B,
-    output [8:0] current_tile   // NOTE, UPDATE TO 8:0 ONCE GRID CONTROLLER FIXED!!!!
+    output [7:0] current_tile   // NOTE, UPDATE TO 8:0 ONCE GRID CONTROLLER FIXED!!!!
     );
 
     localparam TILES_PER_REG = 4;               // number of tiles per reg
     localparam SPRITE_SIZE = 32;                // size of the sprite in pixels
-    localparam N_PER_ROW = 60;
-    localparam N_PER_COL = 33;  // actually 33.75, account for later...
+    localparam N_PER_ROW = 64;   // larger than scree, ok
+    localparam N_PER_COL = 32;   // actually 33.75, account for later...
+
 
     wire [11:0] offset_x, offset_y;
     // if in drawable region, offset to local coords
     assign offset_x = (vde ? (x - (H_SYNC_TIME + H_B_PORCH + H_LR_BORDER)): 0); 
-    assign offset_y = (vde ? (y - (V_SYNC_TIME + V_B_PORCH + V_LR_BORDER) + 12): 0); // add 12 to get centered... 
-
+    assign offset_y = (vde ? (y - (V_SYNC_TIME + V_B_PORCH + V_LR_BORDER)): 0);
+    
+    wire [11:0] lim_x, lim_y;
+    assign lim_x = (offset_x < 2048 ? offset_x : 0);
+    assign lim_y = (offset_y < 1024 ? offset_y : 0);
+    
+    
     // next, flatten 2d coords to current_tile
-    assign current_tile = (((offset_x >> 5) + N_PER_ROW*(offset_y >> 5)) >> 2);
-   
-                                                                       
+    // assign current_tile_full = (((offset_x >> 5) + N_PER_ROW*(offset_y >> 5)) >> 2);
+    wire [6:0] y_sprite, x_sprite;
+    assign x_sprite = lim_x >> 5;
+//    assign y_sprite = lim_y >> 5;
+    assign y_sprite = lim_y[11:5] << 1;
+
+    wire [12:0] tile;
+//    assign tile = (x_sprite + (y_sprite << 6));
+    assign tile = x_sprite + y_sprite;
+    assign current_tile = tile >> 3;    // 8 tiles per reg: divide by 8
+    // assign y_sprite = offset_y[11:5] << 1;   // (y/32)*64
+    // assign current_tile = (x_sprite + y_sprite) >> 3;
+                                                                  
     // Now we need to specify the sprite data.                            
     wire[95:0] spriteDATA; // The total number of columns of data        
     wire[2:0] spritePIX;                                                  
@@ -43,18 +59,19 @@ module pixel_gen_temp #(parameter  WIDTH=1920, HEIGHT=1080,
     wire[11:0] spriteCOL;                                                 
     wire spritePIX_on;
     
+    // take find the current starting bit from the sprite x
     wire [4:0] sprite_val;
-    assign sprite_val = offset_x[6:5] << 3;
+    assign sprite_val = x_sprite[2:0] << 2;
     
-    wire [4:0] sprite_fin;
-    assign sprite_fin = sprite_addr[sprite_val +: 8];
+    wire [3:0] sprite_fin;
+    assign sprite_fin = sprite_addr[sprite_val +: 4];
      
-    assign spriteCOL = offset_x[4:0];   // mod 32
-    assign spriteROW = {sprite_fin, offset_y[4:0]};   // upper bits define offset
+    assign spriteCOL = lim_x[4:0];   // mod 32
+    assign spriteROW = {sprite_fin, lim_y[4:0]};   // upper bits define offset
     
     // Pull Sprite from .COE File
     blk_mem_gen_2 sprite(clk, spriteROW, spriteDATA);
-    assign spritePIX = spriteDATA[((31 - spriteCOL)*3+2) -: 3];
+    assign spritePIX = spriteDATA[((31 - spriteCOL)*3 + 2) -: 3];
     
     // add in future, y_offset < 1080 - 12
     assign spritePIX_on = (spritePIX != 3'b000); // Transparency also handles "ON ROM state"
