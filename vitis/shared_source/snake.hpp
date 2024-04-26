@@ -99,9 +99,17 @@ class snake_head : public snake_node {
     public: 
         dir direction;
         inc increment;
+        unsigned int food_eaten;
 
-        snake_head(int x, int y, dir dir_in, inc inc_in) : snake_node(sp::HEAD, x, y), direction(dir_in), increment(inc_in) {}
+        snake_head(int x, int y, dir dir_in, inc inc_in) : snake_node(sp::HEAD, x, y), sender(sp::PORTALS), reciever(sp::PORTALR), 
+                                                            food_eaten(0), direction(dir_in), increment(inc_in) {
+            this->sender.set_corresponding(&reciever);
+            this->reciever.set_corresponding(&sender);
+        }
 
+        portal sender;
+        portal reciever; 
+ 
         void set_direction(dir h_dir, inc np) {
            this->direction = h_dir;
            this->increment = np; 
@@ -110,14 +118,51 @@ class snake_head : public snake_node {
         // returns true unless invalid collision
         bool step_head() {
             sp collided_sprite;
+            // determine which direction to step in... 
             if (this->direction == dir::HORI) {
-                collided_sprite = this->move_node(this->coord_x + this->increment, this->coord_y, true);
+                return this->move_head(this->coord_x + this->increment, this->coord_y);
+            } else {
+                return this->move_head(this->coord_x, this->coord_y + this->increment);
             }
-            return this->move_node(this->coord_x, this->coord_y + this->increment, true);
-
-
-            return true;
         }
+
+
+        bool move_head(unsigned int x, unsigned int y) {
+            sp collided_sprite = this->move_node(x, y, true);
+
+            switch (collided_sprite) {
+                // if nothing, no collision
+                case sp::TRANSPARENT: 
+                    return true;
+
+                // next, interactions
+                case sp::PORTALS:
+                    // handle portal mechanics
+                    // grab the destination coords
+                    unsigned int x, y;
+                    x = this->reciever.x;
+                    y = this->reciever.y;
+
+                    // next, set the head past the destination portal
+                    // if (this->direction == dir::HORI) {
+                    //     this->move_node
+                    // } else {
+
+                    // }
+                    return true;    // will probably depend on if other side is clear or not
+                case sp::FOOD: 
+                    // increment the food eaten tracker
+                    this->food_eaten++;
+                    // replace food with head
+                    grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
+                    return true;
+                
+                // default case is assumed to be a collision
+                default: 
+                    return false; 
+            }
+        }
+
 };
 
 // inherit from snake_node
@@ -146,15 +191,12 @@ class Snake {
         bool step_snake();
         void add_segment();
 
-        void read_inputs();
+        void read_controller();
 
 
-        portal sender;
-        portal reciever; 
 };
 
-Snake::Snake(unsigned int length) : length(length), sender(sp::PORTALS), reciever(sp::PORTALR),
-                                    head(snake_head(0, 0, dir::VERT, inc::POS)), tail(snake_tail(0, 0)) {
+Snake::Snake(unsigned int length) : length(length), head(snake_head(0, 0, dir::VERT, inc::POS)), tail(snake_tail(0, 0)) {
 
     // initialize snake with all nodes in center and all sprites snake body...
     this->snake_body = std::vector<snake_node> (length, snake_node(sp::BODY, 0, 0));
@@ -163,9 +205,7 @@ Snake::Snake(unsigned int length) : length(length), sender(sp::PORTALS), recieve
     this->reset_snake();
     
     // link the portals
-    this->sender.set_corresponding(&reciever);
-    this->reciever.set_corresponding(&sender);
-}
+    }
 
 // reset the snake to the initial conditions
 void Snake::reset_snake(int head_x, int head_y) {
@@ -250,7 +290,7 @@ void Snake::add_segment() {
     // this->tail_i = length - 1;
 }
 
-void Snake::read_inputs() {
+void Snake::read_controller() {
     // first, send over some info
     for (int i = 0; i < 8; i++) {
         uart::send_char_UART1(56);
@@ -273,16 +313,27 @@ void Snake::read_inputs() {
         this->step_snake();
     }
 
-    // if (input_controller::read_input(inputs::PORTAL1)) {
-    //     // TODO: implement portal control
-        
-    // } else if (input_controller::read_input(inputs::PORTAL2)) {
-    //     // TODO: implement portal control
-    // } else {
-    //     // TODO: reset portal recharge
-    // }
-
-    // if (input_controller::read_input(inputs::BOOST)) {
-    //     // TODO: implement boost control
-    // }
+    else if (temp == 30) {  // assume portal1 shoot
+        // first, compute destination
+        unsigned int x, y;
+        if (this->head.direction == HORI) {
+            x = this->head.get_coords(0) + 5*this->head.increment;   // shoot 5 tiles out
+            y = this->head.get_coords(1);
+        } else {
+            x = this->head.get_coords(0);
+            y = this->head.get_coords(1) + 5*this->head.increment;   // shoot 5 tiles out
+        } 
+        this->head.sender.shoot_portal(x, y);
+    } else if (temp == 31) {  // assume portal2 shoot
+        // first, compute destination
+        unsigned int x, y;
+        if (this->head.direction == HORI) {
+            x = this->head.get_coords(0) + 7*this->head.increment;   // shoot 7 tiles out
+            y = this->head.get_coords(1);
+        } else {
+            x = this->head.get_coords(0);
+            y = this->head.get_coords(1) + 7*this->head.increment;   // shoot 7 tiles out
+        } 
+        this->head.reciever.shoot_portal(x, y);
+    }
 }

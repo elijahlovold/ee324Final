@@ -25,8 +25,8 @@ class portal {
 };
 
 bool portal::shoot_portal(unsigned int tar_x, unsigned int tar_y) {
-    sp temp = sp::PORTALS;
-    this->set = grid_controller::set_sprite(tar_x, tar_y, temp, true);
+    sp set_res = grid_controller::set_sprite(tar_x, tar_y, this->type, true);
+    this->set = (set_res == sp::TRANSPARENT);
     return this->set;
 }
 

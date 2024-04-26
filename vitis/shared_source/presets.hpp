@@ -77,8 +77,10 @@ enum sp {
     WALL = 1, 
     ARCH = 1, 
 
-    PORTALS = 1, // sending portal 
-    PORTALR = 1, // recieving portal
+    PORTALS = 10, // sending portal 
+    PORTALR = 11, // recieving portal
+
+    FOOD = 9, 
 
     HEAD = 0,
     HEAD_TURN = 1,
