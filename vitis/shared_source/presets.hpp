@@ -57,8 +57,8 @@
 #define Y_RES 1080
 #define SPRITE_RES 32
 
-#define MAX_X_COORDS 64
-#define MAX_Y_COORDS 32
+#define MAX_X_COORDS 60
+#define MAX_Y_COORDS 33
 
 #define SNAKE_LENGTH 5
 

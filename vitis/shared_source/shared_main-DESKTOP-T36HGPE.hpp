@@ -25,7 +25,6 @@ int shared_main() {
     while (1) {
         // first, clear the grid
         grid_controller::clear_grid(sp::TRANSPARENT);
-
         // for (int i = 0; i < 2; i++) {
         //     unsigned int val = 0;
         //     for (int j = 0; j < 8; j++) {
@@ -36,14 +35,14 @@ int shared_main() {
 
  
         
-        *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 7*4)) = 0x00000002;
-        // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 8*4)) = 0x22222222;
+        // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR_LOWER + 31*4)) = 0x00000002;
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 5*4)) = 0x00000002;
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 6*4)) = 0x00000002;
 
-        // grid_controller::set_sprite(4, 15, sp::BODY);
-        // grid_controller::set_sprite(4, 16, sp::BODY);
-        // grid_controller::set_sprite(4, 17, sp::BODY);
+        // sp temp = sp::BODY;
+        // grid_controller::set_sprite(30, 15, temp);
+        // grid_controller::set_sprite(4, 16, temp);
+        // grid_controller::set_sprite(4, 17, temp);
 
         // temp = sp::TAIL;
         // grid_controller::set_sprite(4, 18, temp);
@@ -83,7 +82,7 @@ int shared_main() {
             // io::output_to_SevenSeg(temp);
             usleep(100);
             unsigned int temp = io::get_switch_states();
-            *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 240*4)) = temp & 0xFF;
+            *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 7*4)) = temp & 0xFF;
 
             
             // check user inputs
@@ -92,10 +91,6 @@ int shared_main() {
             // if game update timer elapsed, increment player position
             if (Timer::GTC_elapsed()) {
                 io::output_to_SevenSeg(i);
-                // if (io::get_switch_states()) {
-                //     player1.step_snake();
-                // }
-
                 i++;
             //     // update the snake
             //     // if the player collided, end game

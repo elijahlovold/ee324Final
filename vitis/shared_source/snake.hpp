@@ -143,23 +143,36 @@ class snake_head : public snake_node {
                     x = this->reciever.x;
                     y = this->reciever.y;
 
-                    // next, set the head past the destination portal
-                    // if (this->direction == dir::HORI) {
-                    //     this->move_node
-                    // } else {
+                    // compute the offset from the portal based off current head direction
+                    if (this->direction == dir::HORI) {
+                        x += this->increment;
+                    } else {
+                        y += this->increment;
+                    }
 
-                    // }
-                    return true;    // will probably depend on if other side is clear or not
-                case sp::FOOD: 
-                    // increment the food eaten tracker
-                    this->food_eaten++;
-                    // replace food with head
-                    grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
-                    return true;
+                    // next, check if the output is a valid destination
+                    sp dst_spt = grid_controller::get_sprite(x, y);
+
+                    // two valid cases:
+                    if (dst_spt == sp::TRANSPARENT || dst_spt == sp::FOOD) {
+                        // send snake head to destination
+                        this->move_node(x, y);
+                        return true;
+                    } else {    // else, false destination, snake dies
+                        return false;
+                    }
+                    break;
+                    
+                // case sp::FOOD: 
+                //     // increment the food eaten tracker
+                //     this->food_eaten++;
+                //     // replace food with head
+                //     grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
+                //     return true;
                 
-                // default case is assumed to be a collision
-                default: 
-                    return false; 
+                // // default case is assumed to be a collision
+                // default: 
+                //     return false; 
             }
         }
 
@@ -213,20 +226,20 @@ void Snake::reset_snake(int head_x, int head_y) {
     this->head.move_node(head_x, head_y);
 
     // determine the direction 
-    if (this->head.direction == dir::VERT) {
+    if (this->head.direction == dir::HORI) {
         // set the body
         for (unsigned int i = 0; i < this->length; i++) {
-            this->snake_body[i].move_node(head_x + this->head.increment*(i + 1), head_y);
+            this->snake_body[i].move_node(head_x - this->head.increment*(i + 1), head_y);
         }
         // set the tail
-        this->tail.move_node(head_x + this->head.increment*(this->length + 1), head_y);
+        this->tail.move_node(head_x - this->head.increment*(this->length + 1), head_y);
     } else {
         // set the body
         for (unsigned int i = 0; i < this->length; i++) {
-            this->snake_body[i].move_node(head_x, head_y + this->head.increment*(i + 1));
+            this->snake_body[i].move_node(head_x, head_y - this->head.increment*(i + 1));
         }
         // set the tail
-        this->tail.move_node(head_x, head_y + this->head.increment*(this->length + 1));
+        this->tail.move_node(head_x, head_y - this->head.increment*(this->length + 1));
     }
 
 }

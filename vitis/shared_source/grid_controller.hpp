@@ -13,8 +13,20 @@ namespace grid_controller {
 
     void load_map(mp_i map_index);
 
+    sp get_sprite(unsigned int x, unsigned int y);
+
+    sp get_sprite(unsigned int x, unsigned int y) {
+
+    }
+
     // if check_collision, will return true if collision detected
     sp set_sprite(unsigned int x, unsigned int y, sp sprite_addr, bool check_collision) { 
+        // if (y & 1) {
+
+        //    x = 16; 
+        // //    offset--;
+        // }
+        
         unsigned int flat_coords = flatten_coords(x, y);    
         
         // first grab the offset
@@ -27,6 +39,10 @@ namespace grid_controller {
 
         // since, sprite contains 4 elements, only want to set the correct one 
         // figure out which byte it is by mod 4
+        if (y & 1) {
+            flat_coords -= 4;
+        }
+
         unsigned int byte_position = (flat_coords % 8)*4;
 
         // if check_collision and not clearing, first see if a non-transparent sprite is there... 
@@ -42,7 +58,7 @@ namespace grid_controller {
         // clear the byte to zeros
         sprite &= ~(0xF << byte_position);
 
-        unsigned char sprite_addr_val = static_cast<unsigned char>(sprite_addr);
+        unsigned char sprite_addr_val = static_cast<unsigned char>(sprite_addr) & 0xF;
         sprite |= (sprite_addr_val << byte_position);
 
         // std::cout << sprite << " " << offset << " " << flat_coords;

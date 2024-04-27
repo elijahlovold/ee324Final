@@ -23,21 +23,23 @@ module pixel_gen_temp #(parameter  WIDTH=1920, HEIGHT=1080,
     );
 
 
-    localparam TILES_PER_REG = 4;               // number of tiles per reg
-    localparam SPRITE_SIZE = 32;                // size of the sprite in pixels
+    // localparam TILES_PER_REG = 4;               // number of tiles per reg
+    // localparam SPRITE_SIZE = 32;                // size of the sprite in pixels
     localparam N_PER_ROW = 60;
-    localparam N_PER_COL = 33;  // actually 33.75, account for later...
+    // localparam N_PER_COL = 33;  // actually 33.75, account for later...
 
     wire [12:0] offset_x, offset_y;
     // if in drawable region, offset to local coords
-    assign offset_x = (vde ? (x - (H_SYNC_TIME + H_B_PORCH + H_LR_BORDER)): 0); 
-    assign offset_y = (vde ? (y - (V_SYNC_TIME + V_B_PORCH + V_LR_BORDER) + 12): 0); // add 12 to get centered... 
+    assign offset_x = x > 192 ? x - 192 : 0; // (H_SYNC_TIME + H_B_PORCH + H_LR_BORDER) 
+    assign offset_y = y > 41 ? y - 41 : 0; // (V_SYNC_TIME + V_B_PORCH + V_LR_BORDER)
 
     // next, flatten 2d coords to current_tile
 //    assign current_tile = (((offset_x >> 5) + (N_PER_ROW*offset_y) >> 5) >> 3);
-    wire [7:0] x_comp, y_comp;
+    wire [11:0] x_comp, y_comp;
+    // assign x_comp = offset_x >> 5;
     assign x_comp = offset_x >> 5;
-    assign y_comp = N_PER_ROW*(offset_y >> 5);
+    assign y_comp = 60*(offset_y >> 5); // * N_PER_ROW
+    // assign y_comp = 60*(offset_y >> 5); // * N_PER_ROW
     assign current_tile = (x_comp + y_comp) >> 3;
    
                                                                        

@@ -22,15 +22,15 @@
 module sim();
 
     wire HS, VS, Vde;
-    wire [11:0] h_count, v_count;
+    wire [11:0] x_vga, y_vga;
     reg clk, rst;
     reg [31:0] sprite_addr;
     
     wire [7:0] R, G, B;
     wire [7:0] current_tile;
     // create the display using default parameters
-    VGA display (HS, VS, Vde, h_count, v_count, clk, rst);
-    pixel_gen_temp test(h_count, v_count, Vde, sprite_addr, clk, R, G, B, current_tile);
+    VGA display (HS, VS, Vde, x_vga, y_vga, clk, rst);
+    pixel_gen_temp test(x_vga, y_vga, Vde, sprite_addr, clk, R, G, B, current_tile);
 
     // create the clock
     always begin
