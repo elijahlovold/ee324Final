@@ -21,12 +21,6 @@ namespace grid_controller {
 
     // if check_collision, will return true if collision detected
     sp set_sprite(unsigned int x, unsigned int y, sp sprite_addr, bool check_collision) { 
-        // if (y & 1) {
-
-        //    x = 16; 
-        // //    offset--;
-        // }
-        
         unsigned int flat_coords = flatten_coords(x, y);    
         
         // first grab the offset
@@ -61,9 +55,7 @@ namespace grid_controller {
         unsigned char sprite_addr_val = static_cast<unsigned char>(sprite_addr) & 0xF;
         sprite |= (sprite_addr_val << byte_position);
 
-        // std::cout << sprite << " " << offset << " " << flat_coords;
         // store the sprite_addr back into the register... 
-       
         *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + offset*4)) = sprite;
         return sp::TRANSPARENT;
     }

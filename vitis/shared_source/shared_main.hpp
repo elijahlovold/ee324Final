@@ -18,7 +18,8 @@ int shared_main() {
 	io::setup_SevenSeg(1);        // enable 7-seg 
 
     Timer::GTC_enable();
-    Timer::GTC_set_period(1000);    // set 1000ms period
+    // Timer::GTC_set_period(1000);    // set 1000ms period
+    Timer::GTC_set_period(400);    // set 1000ms period
 
     uart::setup_UART1();    // computer comms for ps4 controller
 
@@ -26,17 +27,8 @@ int shared_main() {
         // first, clear the grid
         grid_controller::clear_grid(sp::TRANSPARENT);
 
-        // for (int i = 0; i < 2; i++) {
-        //     unsigned int val = 0;
-        //     for (int j = 0; j < 8; j++) {
-        //         val |= (2 << 4*j);
-        //     }
-        //     *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + i*4)) = val;
-        // }
-
- 
         
-        *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 7*4)) = 0x00000002;
+        // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 7*4)) = 0x00000002;
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 8*4)) = 0x22222222;
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 5*4)) = 0x00000002;
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 6*4)) = 0x00000002;
@@ -45,13 +37,11 @@ int shared_main() {
         // grid_controller::set_sprite(4, 16, sp::BODY);
         // grid_controller::set_sprite(4, 17, sp::BODY);
 
-        // temp = sp::TAIL;
-        // grid_controller::set_sprite(4, 18, temp);
 
         // first, instantiate a snake object
         // will create in the center of the screen
         // create the snake starting with default length
-        // Snake player1;
+        Snake player1;
 
         // for (int i = 0; i < 10; i++) {
         //     usleep(1000000);
@@ -79,32 +69,37 @@ int shared_main() {
 
         int i = 0;
         while (game_play) {
-            // temp = io::get_switch_states();
-            // io::output_to_SevenSeg(temp);
+
             usleep(100);
+
+            // output switches to a sprite for testing...
             unsigned int temp = io::get_switch_states();
             *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 240*4)) = temp & 0xFF;
 
-            
             // check user inputs
-            // player1.read_inputs();
+            player1.read_controller();
 
             // if game update timer elapsed, increment player position
-            if (Timer::GTC_elapsed()) {
+            if (Timer::GTC_elapsed() && io::get_switch_states()) {
+                // display number of seconds played
                 io::output_to_SevenSeg(i);
-                // if (io::get_switch_states()) {
-                //     player1.step_snake();
-                // }
+
+                switch (io::get_switch_states()) {
+                    case 0b0001:
+                        player1.head.set_direction(dir::HORI, player1.head.increment);
+                        break;
+                    case 0b0010: 
+                        player1.head.set_direction(dir::VERT, player1.head.increment);
+                        break;
+                }
 
                 i++;
-            //     // update the snake
-            //     // if the player collided, end game
-            //     game_play = player1.step_snake();
-                
+                game_play = player1.step_snake();
             }
         }
-
+        
         // end of game handler, display information...
+        io::output_to_SevenSeg(9999);
     }
     return 0;
 }

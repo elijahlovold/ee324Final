@@ -13,11 +13,11 @@ class snake_node {
         snake_node(sp sprite, unsigned int x, unsigned int y);
 
         bool set_coords(unsigned int x, unsigned int y);
-        sp move_node(unsigned int x, unsigned int y, bool check_collision = false);
+        sp move_node(unsigned int x, unsigned int y, bool check_collision = false, bool replace = true);
         void set_sprite(sp sprite);
 
         unsigned int get_coords(bool y) const;
-        unsigned int get_sprite() const;
+        sp get_sprite() const;
 
     protected: 
         dir_big node_dir;
@@ -37,9 +37,11 @@ bool snake_node::set_coords(unsigned int x, unsigned int y) {
     }
 }    
 
-sp snake_node::move_node(unsigned int x, unsigned int y, bool check_collision) {
+sp snake_node::move_node(unsigned int x, unsigned int y, bool check_collision, bool replace) {
     // everytime we move the snake, we must first clear the current sprite
-    grid_controller::set_sprite(this->coord_x, this->coord_y, sp::TRANSPARENT);
+    if (replace) {
+        grid_controller::set_sprite(this->coord_x, this->coord_y, sp::TRANSPARENT);
+    }
 
     if (x > MAX_X_COORDS || y > MAX_Y_COORDS) {
         io::output_to_SevenSeg(234);    // error indication
@@ -49,20 +51,8 @@ sp snake_node::move_node(unsigned int x, unsigned int y, bool check_collision) {
         this->coord_y = y;
     }
 
-    io::output_to_SevenSeg(this->coord_y);
-    sp test = sp::BODY;
-    // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR_LOWER + 5*4)) = 0x01010101;
-    // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR_LOWER + 6*4)) = 0x01010101;
-    // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR_LOWER + 7*4)) = 0x01010101;
-    // grid_controller::set_sprite(4, 4, test);
-    // grid_controller::set_sprite(4, 5, test);
-    // grid_controller::set_sprite(4, 6, test);
-
-    this->set_sprite(sp::BODY);
-    // return grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
+    return grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
     // return grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite, check_collision);
-    // return grid_controller::set_sprite(this->coord_x, this->coord_y, temp);
-    return sp::TRANSPARENT;
 }
 
 void snake_node::set_sprite(sp sprite) {
@@ -80,7 +70,7 @@ unsigned int snake_node::get_coords(bool y) const {
     }
 }
 
-unsigned int snake_node::get_sprite() const {
+sp snake_node::get_sprite() const {
     return this->node_sprite;
 }
 
@@ -117,7 +107,6 @@ class snake_head : public snake_node {
 
         // returns true unless invalid collision
         bool step_head() {
-            sp collided_sprite;
             // determine which direction to step in... 
             if (this->direction == dir::HORI) {
                 return this->move_head(this->coord_x + this->increment, this->coord_y);
@@ -128,15 +117,18 @@ class snake_head : public snake_node {
 
 
         bool move_head(unsigned int x, unsigned int y) {
-            sp collided_sprite = this->move_node(x, y, true);
+            sp collided_sprite = this->move_node(x, y, true, false);
+            // sp collided_sprite = grid_controller::set_sprite(x, y, this->node_sprite, true);
 
             switch (collided_sprite) {
                 // if nothing, no collision
-                case sp::TRANSPARENT: 
+                case sp::TRANSPARENT: {
                     return true;
+                } 
 
                 // next, interactions
-                case sp::PORTALS:
+                case sp::PORTALS: {
+
                     // handle portal mechanics
                     // grab the destination coords
                     unsigned int x, y;
@@ -161,18 +153,20 @@ class snake_head : public snake_node {
                     } else {    // else, false destination, snake dies
                         return false;
                     }
-                    break;
-                    
-                // case sp::FOOD: 
-                //     // increment the food eaten tracker
-                //     this->food_eaten++;
-                //     // replace food with head
-                //     grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
-                //     return true;
-                
-                // // default case is assumed to be a collision
-                // default: 
-                //     return false; 
+                }
+
+                case sp::FOOD: {
+                    // increment the food eaten tracker
+                    this->food_eaten++;
+                    // replace food with head
+                    grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
+                    return true;
+                } 
+
+                // default case is assumed to be a collision
+                default: {
+                    return false; 
+                }
             }
         }
 
@@ -198,7 +192,7 @@ class Snake {
 
         Snake(unsigned int length = SNAKE_LENGTH);
         
-        void reset_snake(int head_x = 4, int head_y = 15);
+        void reset_snake(int head_x = 30, int head_y = 15);
         void set_direction(dir h_dir, inc np);
 
         bool step_snake();
@@ -209,7 +203,7 @@ class Snake {
 
 };
 
-Snake::Snake(unsigned int length) : length(length), head(snake_head(0, 0, dir::VERT, inc::POS)), tail(snake_tail(0, 0)) {
+Snake::Snake(unsigned int length) : length(length), head(snake_head(0, 0, dir::VERT, inc::NEG)), tail(snake_tail(0, 0)) {
 
     // initialize snake with all nodes in center and all sprites snake body...
     this->snake_body = std::vector<snake_node> (length, snake_node(sp::BODY, 0, 0));
@@ -251,15 +245,12 @@ void Snake::set_direction(dir h_dir, inc np) {
 bool Snake::step_snake() {
     unsigned int tar_x, tar_y; 
 
-    // 1. clear tail
-    this->tail.set_sprite(sp::TRANSPARENT);
-
-    // 2. move tail to end of body 
+    // 1. clear and move tail to end of body 
     tar_x = this->snake_body[this->length - 1].get_coords(0); // end of body x
     tar_y = this->snake_body[this->length - 1].get_coords(1); // end of body x
     this->tail.move_node(tar_x, tar_y);
 
-    // 3. update body locations
+    // 2. update body locations
     for (int i = this->length - 1; i > 0; i--) {            // start at end of body 
         tar_x = this->snake_body[i - 1].get_coords(0);      // next node x
         tar_y = this->snake_body[i - 1].get_coords(1);      // next node y
@@ -267,12 +258,9 @@ bool Snake::step_snake() {
     }
     tar_x = this->head.get_coords(0);   // head x
     tar_y = this->head.get_coords(1);   // head y
-    this->snake_body[0].set_coords(tar_x, tar_y);  // set joint location to head
+    this->snake_body[0].move_node(tar_x, tar_y, false, false);  // set joint location to head
 
-    // 4. update joint sprite before head
-    // won't need if cube sprites...
-
-    // 5. move head 
+    // 3. move head 
     return this->head.step_head();
 }
 
@@ -313,17 +301,13 @@ void Snake::read_controller() {
     io::output_to_SevenSeg(temp);
 
     if (temp == 22) {
-        this->set_direction(dir::VERT, inc::POS);
-        this->step_snake();
-    } else if (temp == 23) {
         this->set_direction(dir::VERT, inc::NEG);
-        this->step_snake();
+    } else if (temp == 23) {
+        this->set_direction(dir::VERT, inc::POS);
     } else if (temp == 21) {
-        this->set_direction(dir::HORI, inc::POS);
-        this->step_snake();
-    } else if (temp == 20) {
         this->set_direction(dir::HORI, inc::NEG);
-        this->step_snake();
+    } else if (temp == 20) {
+        this->set_direction(dir::HORI, inc::POS);
     }
 
     else if (temp == 30) {  // assume portal1 shoot
