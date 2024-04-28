@@ -149,6 +149,9 @@ unsigned char Snake::read_controller(bool game_state) {
             y = this->head.get_coords(1) + 7*this->head.increment;   // shoot 7 tiles out
         } 
         this->head.reciever.shoot_portal(x, y);
+    } else if (temp > 0 && temp < 5) {
+        audio::play_audio(clip::PING);
     }
+
     return temp;
 }

@@ -16,7 +16,7 @@
 	(
 		// Users to add ports here
         output wire play, stop,
-        output wire [1:0]soundchoice,
+        output wire [2:0]soundchoice,
 		// User ports ends
 		// Do not modify the ports beyond this line
 

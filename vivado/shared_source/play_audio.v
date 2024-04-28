@@ -55,6 +55,7 @@ module play_audio(
                 3: audio <= PortalTravel_pwm & travel_on;
                 4: audio <= Move_pwm & move_on;
                 5: audio <= GameOver_pwm & gameover_on;
+                default: audio <= 0;
             endcase
         end
     end

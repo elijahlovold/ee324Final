@@ -31,7 +31,6 @@ int shared_main() {
     colors::default_colors();
 
     audio::enable_audio(0);
-    audio::play_audio(clip::CHOMP); // output none
 
     uart::setup_UART1();    // computer comms for ps4 controller
 
@@ -67,6 +66,7 @@ int shared_main() {
         while (!io::get_button_states() && (uart::ps4_transfer(game_color) != 14)) {
             seed++;
         }
+        audio::play_audio(clip::PING); // output none
         srand(seed);
 
         io::setup_SevenSeg();   // back to normal mode
@@ -99,6 +99,7 @@ int shared_main() {
 
         uart::ps4_transfer(RGB(255,0,0), false);
 
+        audio::play_audio(clip::GAME_OVER); // output none
         io::setup_SevenSeg(3);  // custom mode
         // display "LOSE" on seven-seg
         *((unsigned int *)SVN_SEG_DATA) = 0b11000111110000001001001010000110;

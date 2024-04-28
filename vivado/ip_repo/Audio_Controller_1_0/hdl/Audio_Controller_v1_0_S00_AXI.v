@@ -16,7 +16,7 @@
 	(
 		// Users to add ports here
         output wire PLAY, STOP,
-        output wire [1:0]SOUNDCHOICE,
+        output wire [2:0]SOUNDCHOICE,
 		// User ports ends
 		// Do not modify the ports beyond this line
 
@@ -399,7 +399,7 @@
 	end    
 
 	// Add user logic here
-    assign SOUNDCHOICE = slv_reg0[1:0];
+    assign SOUNDCHOICE = slv_reg0[2:0];
     assign PLAY = slv_reg1[0];
     assign STOP = slv_reg2[0];
 	// User logic ends

@@ -12,7 +12,7 @@ namespace audio {
         unsigned char audio = static_cast<unsigned char>(cl);
 
         // set desired clip
-        *((unsigned int *)(AUDIO_CONTROLLER_BASE_ADDR)) = audio & 0b11;
+        *((unsigned int *)(AUDIO_CONTROLLER_BASE_ADDR)) = audio & 0b111;
 
         // toggle on/off to start 
         enable_audio();     // enable

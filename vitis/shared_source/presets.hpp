@@ -91,6 +91,8 @@ enum clip {
     CHOMP = 1, 
     PORTAL_PLACE = 2, 
     PORTAL_TRAVEL = 3, 
+    PING = 4, 
+    GAME_OVER = 5,
 };
 
 struct RGB {

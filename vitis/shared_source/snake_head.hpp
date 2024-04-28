@@ -87,6 +87,7 @@ class snake_head : public snake_node {
                         return true;
                     }
 
+                    audio::play_audio(clip::PORTAL_TRAVEL);
                     // else, go through portal 
                     
                     // grab the destination coords of reciever
@@ -104,8 +105,6 @@ class snake_head : public snake_node {
                     // next, check if the output is a valid destination
                     sp dst_spt = grid_controller::get_sprite(x, y);
 
-                    audio::play_audio(clip::PORTAL_TRAVEL);
-
                     // two valid cases:
                     if (dst_spt == sp::TRANSPARENT || dst_spt == sp::FOOD) {
                         // send snake head to destination
@@ -122,6 +121,8 @@ class snake_head : public snake_node {
                 }
 
                 case sp::FOOD: {
+                    audio::play_audio(clip::CHOMP);  // output none
+
                     // increment the food eaten tracker
                     this->food_eaten++;
                     io::output_to_SevenSeg(this->food_eaten);
@@ -131,8 +132,6 @@ class snake_head : public snake_node {
                     
                     // spawn a new food
                     spawn_food();
-
-                    audio::play_audio(clip::CHOMP);  // output none
                     return true;
                 } 
 
