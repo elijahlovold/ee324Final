@@ -32,6 +32,40 @@ namespace uart {
         *((unsigned int *)(UART_BASE_ADDR + 0x30)) = message;
     }
 
+	unsigned char read_char_UART1() {
+
+		// poll the FIFO until data arrives	
+		unsigned int data_check;
+		do {
+			// FIFO recieve buffer empty status, bit 1 equals 1 when empty
+			data_check = *((unsigned int *)(UART_BASE_ADDR + 0x2C));
+			data_check &= 0b10;
+			usleep(100);
+		} while (data_check != 0);
+
+		return *((unsigned int *)(UART_BASE_ADDR + 0x30));
+	}
+
+	unsigned char ps4_transfer(RGB color, bool game_state = true) {
+		// first, send over colors
+		send_char_UART1(color.R);
+		send_char_UART1(color.G);
+		send_char_UART1(color.B);
+
+		// send over game state
+		send_char_UART1(static_cast<unsigned int>(game_state));
+
+		// zero fill the rest
+		for (int i = 0; i < 4; i++) {
+			send_char_UART1(56);
+		}
+
+		// next, read back controller info byte
+		unsigned char response1 = read_char_UART1(); 
+		unsigned char response2 = read_char_UART1(); 
+		
+		return response1;
+	}
 };
 
 /*

@@ -14,16 +14,18 @@ module play_audio(
     wire [16:0] PortalTravel_addr;
     wire [7:0] PortalTravel_data;
     wire PortalTravel_pwm;
-    
-    audio_controller control_chomp(clk, rst, 22706, chomp_addr);
+
+    wire chomp_on, place_on, travel_on;
+
+    audio_controller #(22706, 2158) control_chomp(clk, rst, play, chomp_addr, chomp_on);
     chomp_rom chomp(clk, chomp_addr, chomp_data);
     PWM pwm_chomp(clk, rst, chomp_data, chomp_pwm);
     
-    audio_controller control_PortalPlace(clk, rst, 20800, PortalPlace_addr);
+    audio_controller #(20800, 3629) control_PortalPlace(clk, rst, play, PortalPlace_addr, place_on);
     PortalPlace_rom PortalPlace(clk, PortalPlace_addr, PortalPlace_data);
     PWM pwm_PortalPlace(clk, rst, PortalPlace_data, PortalPlace_pwm);
     
-    audio_controller control_PortalTravel(clk, rst, 22607, PortalTravel_addr);
+    audio_controller #(22607, 8756) control_PortalTravel(clk, rst, play, PortalTravel_addr, travel_on);
     PortalTravel_rom PortalTravel(clk, PortalTravel_addr, PortalTravel_data);
     PWM pwm_PortalTravel(clk, rst, PortalTravel_data, PortalTravel_pwm);
     
@@ -32,18 +34,12 @@ module play_audio(
             audio <= 0;
         end
         else begin
-            if (play) begin
-                case (soundchoice)
-                    0:  audio <= 0; // Play nothing
-                    1:  audio <= chomp_pwm; // PWM modded output
-                    2:  audio <= PortalPlace_pwm;
-                    3:  audio <= PortalTravel_pwm;
-                    default: audio <= 0;
-                endcase
-            end
-            else if (stop) begin
-                audio <= 0;
-            end
+            case (soundchoice)
+                0: audio <= 0; // Play nothing
+                1: audio <= chomp_pwm & chomp_on; // PWM modded output
+                2: audio <= PortalPlace_pwm & place_on;
+                3: audio <= PortalTravel_pwm & travel_on;
+            endcase
         end
     end
 endmodule
@@ -74,10 +70,10 @@ module PWM(
     assign pwm_out = width ? 1'b1 : 1'b0;
 endmodule
 
-module audio_controller(
-input clk, rst, 
-input [15:0] value, 
-output reg [31:0] addr 
+module audio_controller #(parameter VALUE=1000, DEPTH=1000) (
+input clk, rst, play, 
+output reg [31:0] addr, 
+output reg count_en 
 );
 // value = 100MHz / (1/(audiofileLength) * SampleSize)
 // chomp is .49 seconds
@@ -90,11 +86,24 @@ always @ (posedge clk, posedge rst) begin
         addr <= 0;
     end
     else begin
-        count <= count + 1;
-        if (count >= value) begin
-            addr <= addr + 1;
+        if (play) begin 
+            count_en <= 1;
             count <= 0;
+            addr <= 0;
         end
+        else 
+            if (count_en && (addr < DEPTH)) begin
+                count <= count + 1;
+                if (count >= VALUE) begin
+                    addr <= addr + 1;
+                    count <= 0;
+                end
+            end
+            else begin 
+                count <= 0;
+                addr <= 0;
+                count_en <= 0;
+            end
     end
 end
 endmodule

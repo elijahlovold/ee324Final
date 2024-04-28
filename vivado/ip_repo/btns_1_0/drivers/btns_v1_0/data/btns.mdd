@@ -1,0 +1,10 @@
+
+
+OPTION psf_version = 2.1;
+
+BEGIN DRIVER btns
+	OPTION supported_peripherals = (btns);
+	OPTION copyfiles = all;
+	OPTION VERSION = 1.0;
+	OPTION NAME = btns;
+END DRIVER

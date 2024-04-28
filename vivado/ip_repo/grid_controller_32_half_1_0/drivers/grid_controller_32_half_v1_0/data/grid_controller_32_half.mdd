@@ -1,0 +1,10 @@
+
+
+OPTION psf_version = 2.1;
+
+BEGIN DRIVER grid_controller_32_half
+	OPTION supported_peripherals = (grid_controller_32_half);
+	OPTION copyfiles = all;
+	OPTION VERSION = 1.0;
+	OPTION NAME = grid_controller_32_half;
+END DRIVER

@@ -1,212 +1,154 @@
 #pragma once
 
 #include "presets.hpp"
-#include "input_controller.hpp"
-#include "grid_controller.hpp"
-#include "portal.hpp"
-
-class snake_node {
-    public: 
-        snake_node(sp sprite, unsigned int x, unsigned int y);
-
-        bool set_coords(unsigned int x, unsigned int y, bool check_collision = false);
-        void set_sprite(sp sprite);
-
-        unsigned int get_coords(bool y) const;
-        unsigned int get_sprite() const;
-
-    private: 
-        sp node_sprite;  // only need 8 bytes
-        unsigned int coord_x;       // grid tile the node is on
-        unsigned int coord_y;       // grid tile the node is on 
-};
-
-bool snake_node::set_coords(unsigned int x, unsigned int y, bool check_collision) {
-    // everytime we move the snake, we must first clear the current sprite
-    sp temp = sp::TRANSPARENT;
-    grid_controller::set_sprite(this->coord_x, this->coord_y, temp);
-
-    if (x > MAX_X_COORDS || y > MAX_Y_COORDS) {
-        return false;
-    } else {
-        this->coord_x = x;
-        this->coord_y = y;
-    }
-    // update the node on the grid
-    return grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite, check_collision);
-}
-
-void snake_node::set_sprite(sp sprite) {
-    this->node_sprite = sprite;
-
-    // update the node on the grid
-    grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
-}
-
-unsigned int snake_node::get_coords(bool y) const {
-    if (y) {
-        return this->coord_y;
-    } else {
-        return this->coord_x;
-    }
-}
-
-unsigned int snake_node::get_sprite() const {
-    return this->node_sprite;
-}
-
-snake_node::snake_node(sp sprite, unsigned int x, unsigned int y) {
-    // check inputs... 
-    this->set_coords(x, y);
-    this->set_sprite(sprite);
-}
-
-
-
+#include "snake_node.hpp"
+#include "snake_head.hpp"
+#include "snake_tail.hpp"
 
 class Snake {
     public:
-        unsigned int head_i;
-        unsigned int tail_i;
+        input_device dev;
 
-        unsigned int snake_length;
-        std::vector<snake_node> snake;
+        unsigned int length;
 
-        dir head_direction;
+        unsigned int s_x, s_y;
 
-        Snake(unsigned int length = SNAKE_LENGTH);
+        std::vector<snake_node> snake_body;
+        snake_head head;
+        snake_tail tail;
+
+        Snake(unsigned int x = 30, unsigned int y = 15, unsigned int length = SNAKE_LENGTH);
         
-        void reset_snake(int head_x = 0, int head_y = 0);
-        void set_direction(dir h_dir);
+        void reset_snake();
+        void set_direction(dir h_dir, inc np, snake_node &prev);
 
         bool step_snake();
-        void add_segment();
 
-        void read_inputs();
+        unsigned char read_controller(bool game_state = true);
 
-        portal sender;
-        portal reciever; 
+
 };
 
-Snake::Snake(unsigned int length) : snake_length(length), head_i(0), tail_i(length-1), sender(sp::PORTALS), reciever(sp::PORTALR) {
-    // first, set direction to right
-    this->set_direction(dir::RIGHT);
+Snake::Snake(unsigned int x, unsigned int y, unsigned int length) :
+    length(length), head(snake_head(0, 0, dir::VERT, inc::NEG)), tail(snake_tail(0, 0)) {
 
+    if (grid_controller::check_coords(x,y)) {
+        this->s_x = x;
+        this->s_y = y;
+    } else {
+        this->s_x = 30;
+        this->s_y = 15;
+    }
     // initialize snake with all nodes in center and all sprites snake body...
-    this->snake = std::vector<snake_node> (snake_length, snake_node(sp::BODY, 0, 0));
-
-    this->snake[this->head_i].set_sprite(sp::HEAD);   // set the tail
-    this->snake[this->tail_i].set_sprite(sp::TAIL);   // set the head
+    this->snake_body = std::vector<snake_node> (length, snake_node(sp::BODY, 0, 0));
 
     // set the snake in the middle of the map
     this->reset_snake();
     
     // link the portals
-    this->sender.set_corresponding(&reciever);
-    this->reciever.set_corresponding(&sender);
-}
+    }
 
 // reset the snake to the initial conditions
-void Snake::reset_snake(int head_x, int head_y) {
-    this->snake[this->head_i].set_coords(head_x, head_y);
-    if (this->head_direction == dir::RIGHT || this->head_direction == dir::LEFT) {
-        for (unsigned int i = 0; i < this->snake_length - 1; i++) {
-            this->snake[i].set_coords(head_x + this->head_direction*i, head_y);
+void Snake::reset_snake() {
+    // set the head
+    this->head.move_node(this->s_x, this->s_y);
+
+    // determine the direction 
+    if (this->head.direction == dir::HORI) {
+        // set the body
+        for (unsigned int i = 0; i < this->length; i++) {
+            this->snake_body[i].move_node(this->s_x - this->head.increment*(i + 1), this->s_y);
         }
+        // set the tail
+        this->tail.move_node(this->s_x - this->head.increment*(this->length + 1), this->s_y);
     } else {
-        for (unsigned int i = 0; i < this->snake_length - 1; i++) {
-            this->snake[i].set_coords(head_x, head_y + this->head_direction*i);
+        // set the body
+        for (unsigned int i = 0; i < this->length; i++) {
+            this->snake_body[i].move_node(this->s_x, this->s_y - this->head.increment*(i + 1));
         }
+        // set the tail
+        this->tail.move_node(this->s_x, this->s_y - this->head.increment*(this->length + 1));
     }
+
 }
 
-void Snake::set_direction(dir h_dir) {
-    this->head_direction = h_dir;
+void Snake::set_direction(dir h_dir, inc np, snake_node &prev) {
+    this->head.set_direction(h_dir, np, prev);
 }
 
 bool Snake::step_snake() {
-    // loop through snake updating positions
+    unsigned int tail_x, tail_y; 
+    // 1. get target tail coords
+    tail_x = this->snake_body[this->length - 1].get_coords(0); // end of body x
+    tail_y = this->snake_body[this->length - 1].get_coords(1); // end of body x
+    unsigned int dir_x = this->snake_body[this->length - 2].get_coords(0); // end of body x
+    unsigned int dir_y = this->snake_body[this->length - 2].get_coords(1); // end of body x
 
-    unsigned int prev_x = this->snake[this->head_i].get_coords(0);
-    unsigned int prev_y = this->snake[this->head_i].get_coords(1);
-    unsigned int prev_x_temp, prev_y_temp;
+    unsigned int tar_x, tar_y; 
+    // 2. update body locations
+    for (int i = this->length - 1; i > 0; i--) {            // start at end of body 
+        tar_x = this->snake_body[i - 1].get_coords(0);      // next node x
+        tar_y = this->snake_body[i - 1].get_coords(1);      // next node y
+        this->snake_body[i].set_coords(tar_x, tar_y);  // set coords   
+    }
+    tar_x = this->head.get_coords(0);   // head x
+    tar_y = this->head.get_coords(1);   // head y
+    this->snake_body[0].move_node(tar_x, tar_y, false, false);  // set joint location to head
 
-    // first determine where head should go
-    // if the head collides, return false
-    if (this->head_direction == dir::RIGHT || this->head_direction == dir::LEFT) {
-        if (this->snake[head_i].set_coords(prev_x + this->head_direction, prev_y, true) == false) {
-            return false;
-        }
-    } else {
-        if (this->snake[head_i].set_coords(prev_x, prev_y + this->head_direction, true) == false) {
-            return false;
-        }
+    // 3. move head 
+    // need to see if food was eaten to tell if we should add a segment
+    unsigned int prev_food = this->head.food_eaten;
+
+    bool ret = this->head.step_head();
+
+    // if successful and a food was eaten, grow snake
+    if (ret && (this->head.food_eaten > prev_food)) {
+        this->length++;
+        this->snake_body.push_back(snake_node(sp::BODY, tail_x, tail_y));
+    } else {    // else, move the tail
+        this->tail.move_tail(tail_x, tail_y, dir_x, dir_y);
     }
 
-    // next, loop through the snake updating coords
-    for (unsigned int i = 1; i < this->snake_length; i++) {
-        // save current coords
-        prev_x_temp = this->snake[i].get_coords(0);
-        prev_y_temp = this->snake[i].get_coords(1);
-
-        this->snake[i].set_coords(prev_x, prev_y);
-
-        prev_x = prev_x_temp;
-        prev_y = prev_y_temp;
-    }
-
-    return true;
+    return ret;
 }
 
-void Snake::add_segment() {
-    // first figure out where to add the tail
-    unsigned int tail_x = this->snake[this->tail_i].get_coords(0);
-    unsigned int tail_y = this->snake[this->tail_i].get_coords(1);
+unsigned char Snake::read_controller(bool game_state) {
+    // first, send over some info
+    RGB test(0, 255, 0);
+    unsigned char temp = uart::ps4_transfer(test, game_state);
 
-    unsigned int tail_1_x = this->snake[this->tail_i - 1].get_coords(0);
-    unsigned int tail_1_y = this->snake[this->tail_i - 1].get_coords(1);
-
-    int x_diff = tail_x - tail_1_x;
-    int y_diff = tail_y - tail_1_y;
-    // if diff in x, add along x direction
-    if (x_diff != 0) {
-        this->snake.push_back(snake_node(sp::TAIL, tail_x + x_diff, tail_y));
-    } 
-    // else, add along y direction  
-    else {
-        this->snake.push_back(snake_node(sp::TAIL, tail_x, tail_y + y_diff));
+    if (temp == 22) {
+        this->set_direction(dir::VERT, inc::NEG, snake_body[0]);
+    } else if (temp == 23) {
+        this->set_direction(dir::VERT, inc::POS, snake_body[0]);
+    } else if (temp == 21) {
+        this->set_direction(dir::HORI, inc::NEG, snake_body[0]);
+    } else if (temp == 20) {
+        this->set_direction(dir::HORI, inc::POS, snake_body[0]);
     }
 
-    // now, update old tail sprite
-    this->snake[this->tail_i].set_sprite(sp::BODY);
-
-    // update length and tail index
-    this->snake_length = this->snake.size();
-    this->tail_i = snake_length - 1;
-}
-
-void Snake::read_inputs() {
-
-    if (input_controller::read_input(inputs::UP_I)) {
-        this->set_direction(dir::UP);
-    } else if (input_controller::read_input(inputs::DOWN_I)) {
-        this->set_direction(dir::DOWN);
-    } else if (input_controller::read_input(inputs::RIGHT_I)) {
-        this->set_direction(dir::RIGHT);
-    } else if (input_controller::read_input(inputs::LEFT_I)) {
-        this->set_direction(dir::LEFT);
+    else if (temp == 8) {  // assume portal1 shoot
+        // first, compute destination
+        unsigned int x, y;
+        if (this->head.direction == HORI) {
+            x = this->head.get_coords(0) + 5*this->head.increment;   // shoot 5 tiles out
+            y = this->head.get_coords(1);
+        } else {
+            x = this->head.get_coords(0);
+            y = this->head.get_coords(1) + 5*this->head.increment;   // shoot 5 tiles out
+        } 
+        this->head.sender.shoot_portal(x, y);
+    } else if (temp == 7) {  // assume portal2 shoot
+        // first, compute destination
+        unsigned int x, y;
+        if (this->head.direction == HORI) {
+            x = this->head.get_coords(0) + 7*this->head.increment;   // shoot 7 tiles out
+            y = this->head.get_coords(1);
+        } else {
+            x = this->head.get_coords(0);
+            y = this->head.get_coords(1) + 7*this->head.increment;   // shoot 7 tiles out
+        } 
+        this->head.reciever.shoot_portal(x, y);
     }
-
-    if (input_controller::read_input(inputs::PORTAL1)) {
-        // TODO: implement portal control
-        
-    } else if (input_controller::read_input(inputs::PORTAL2)) {
-        // TODO: implement portal control
-    } else {
-        // TODO: reset portal recharge
-    }
-
-    if (input_controller::read_input(inputs::BOOST)) {
-        // TODO: implement boost control
-    }
+    return temp;
 }

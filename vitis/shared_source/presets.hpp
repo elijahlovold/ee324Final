@@ -5,51 +5,131 @@
 #include <math.h>
 #include <vector>
 #include <time.h>
+#include <stdio.h>	  		// Library for srand() and rand()
 
-#define GRID_CONTROLLER_BASE_ADDR 0x43C00000
-#define INPUT_CONTROLLER_BASE_ADDR 0x43C10000
-// #define TIMER_BASE_ADDR 0x41250000
+#define PERIOD 1000     // sets the period of the PWM
+
+#define GRID_CONTROLLER_BASE_ADDR 0x43C30000
+#define COLOR_CONTROLLER_BASE_ADDR 0x43C40000
+#define AUDIO_CONTROLLER_BASE_ADDR 0x43C50000
+
+
+#define BUTTONS_BASEADDR 0x41200000		// Base address of the Buttons 
+#define LED_BASEADDR     0x41210000		// Base address of LED IP
+#define SWITCH_BASEADDR  0x41220000		// Base address of the Switches 						
+#define SVN_SEG_CNTL     0x43C10000		// Base address of the Seven-Segment Display Control 	
+#define SVN_SEG_DATA     0x43C10004		// Base address of the Seven-Segment Display Data
+
+// RGB addresses for LED #10 and #11
+#define B_0_EN 		0x43C00000
+#define B_0_PERIOD  0x43C00004
+#define B_0_WIDTH 	0x43C00008
+
+#define G_0_EN 		0x43C00010
+#define G_0_PERIOD  0x43C00014
+#define G_0_WIDTH 	0x43C00018
+
+#define R_0_EN 		0x43C00020
+#define R_0_PERIOD  0x43C00024
+#define R_0_WIDTH 	0x43C00028
+
+#define B_1_EN 		0x43C00030
+#define B_1_PERIOD  0x43C00034
+#define B_1_WIDTH 	0x43C00038
+
+#define G_1_EN 		0x43C00040
+#define G_1_PERIOD  0x43C00044
+#define G_1_WIDTH 	0x43C00048
+
+#define R_1_EN 		0x43C00050
+#define R_1_PERIOD  0x43C00054
+#define R_1_WIDTH 	0x43C00058
+
+
+#define GTC_BASE_ADDR 0xF8F00000
 #define UART_BASE_ADDR 0xE0001000
 
 #define MAX_SPRITE_ADDR 45
 
 #define X_RES 1920
 #define Y_RES 1080
-#define SPRITE_RES 40
+#define SPRITE_RES 32
 
-#define MAX_X_COORDS X_RES/SPRITE_RES
-#define MAX_Y_COORDS Y_RES/SPRITE_RES
+#define MAX_X_COORDS 60
+#define MAX_Y_COORDS 33
 
 #define SNAKE_LENGTH 5
 
 enum sp {
     TRANSPARENT = 0,
-    BK = 1, 
-    // WALL = 2, 
-    // ARCH = 3, 
 
-    // PORTALS = 10, // sending portal 
-    // PORTALR = 11, // recieving portal
+    HEAD_UP = 1, 
+    HEAD_DOWN = 3, 
+    HEAD_LEFT = 4, 
+    HEAD_RIGHT = 2, 
+    
+    BODY = 5, 
 
-    // HEAD = 20,
-    // TAIL = 21, 
-    // BODY = 22,
-    WALL = 1, 
-    ARCH = 1, 
+    TAIL_UP = 6, 
+    TAIL_DOWN = 8, 
+    TAIL_RIGHT = 7, 
+    TAIL_LEFT = 9, 
 
-    PORTALS = 1, // sending portal 
-    PORTALR = 1, // recieving portal
+    FOOD = 10, 
+    FOOD_TEL = 11, 
 
-    HEAD = 1,
-    TAIL = 1, 
-    BODY = 1,
+    PORTALS = 12, 
+    PORTALR = 13, 
+
+    WALL = 14, 
+
+    ERROR = 999,
 };
 
+enum clip {
+    NONE = 0,
+    CHOMP = 1, 
+    PORTAL_PLACE = 2, 
+    PORTAL_TRAVEL = 3, 
+};
+
+struct RGB {
+    unsigned char R;
+    unsigned char G;
+    unsigned char B;
+
+    RGB(unsigned char r, unsigned char g, unsigned char b) : R(r), G(g), B(b) {}
+};
+
+enum color {
+    BODY_CORE = 1, 
+    PUPIL = 2,
+    IRIS_APPLE = 3, 
+    BODY_ACCENT_SEND = 4, 
+
+    RECIEVE = 7,
+};
+
+enum input_device {
+    CONTROLLER = 0, 
+    BOARD = 1
+};
+
+enum dir_big {
+    UP = 0, 
+    DOWN = 1, 
+    RIGHT = 2, 
+    LEFT = 3
+}; 
+
 enum dir {
-    RIGHT = 1,
-    LEFT = -1,
-    UP = 1, 
-    DOWN = -1,
+    HORI = 0,
+    VERT = 1
+};
+
+enum inc {
+    POS = 1,
+    NEG = -1, 
 };
 
 enum inputs {
