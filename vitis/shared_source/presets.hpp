@@ -5,6 +5,7 @@
 #include <math.h>
 #include <vector>
 #include <time.h>
+#include <stdio.h>	  		// Library for srand() and rand()
 
 #define PERIOD 1000     // sets the period of the PWM
 
@@ -64,31 +65,33 @@
 
 enum sp {
     TRANSPARENT = 0,
-    BK = 1, 
-    // WALL = 2, 
-    // ARCH = 3, 
 
-    // PORTALS = 10, // sending portal 
-    // PORTALR = 11, // recieving portal
+    HEAD_UP = 1, 
+    HEAD_DOWN = 3, 
+    HEAD_LEFT = 4, 
+    HEAD_RIGHT = 2, 
+    
+    BODY = 5, 
 
-    // HEAD = 20,
-    // TAIL = 21, 
-    // BODY = 22,
-    WALL = 1, 
-    ARCH = 1, 
+    TAIL_UP = 6, 
+    TAIL_DOWN = 8, 
+    TAIL_RIGHT = 7, 
+    TAIL_LEFT = 9, 
 
-    PORTALS = 10, // sending portal 
-    PORTALR = 11, // recieving portal
+    FOOD = 10, 
+    FOOD_TEL = 11, 
 
-    FOOD = 9, 
+    PORTALS = 12, 
+    PORTALR = 13, 
 
-    HEAD = 0,
-    HEAD_TURN = 1,
-    BODY = 2,
-    BODY_TURN = 3, 
-    TAIL = 4,
-    TAIL_TURN = 5,
+    WALL = 14, 
+
     ERROR = 999,
+};
+
+enum input_device {
+    CONTROLLER = 0, 
+    BOARD = 1
 };
 
 enum dir_big {

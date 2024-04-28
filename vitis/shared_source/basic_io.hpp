@@ -64,6 +64,14 @@ namespace io {
         return switch_states;
     }
 
+    bool get_switch(unsigned int sw) {
+        if (sw > 11) {
+            return false;
+        }
+        unsigned int sws = get_switch_states();
+        return (sws >> sw) & 1;
+    }
+
     /*************************************************************
      * Function: output_to_LEDs ()                               *
      * Date Created: January 20, 2023                            *
@@ -99,7 +107,7 @@ namespace io {
     * Preconditions: None                        				 *
     * Postconditions: LEDs contain state of LED_value           *
     *************************************************************/
-    void setup_SevenSeg(uint32_t en) {
+    void setup_SevenSeg(uint32_t en = 1) {
         *((uint32_t *)SVN_SEG_CNTL) = en;
     }
 

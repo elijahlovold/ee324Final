@@ -18,6 +18,15 @@ module pixel_gen_temp #(parameter  WIDTH=1920, HEIGHT=1080,
     input [11:0] x, y, input vde,
     input [31:0] sprite_addr, // to choose sprite from this file
     input clk,
+    input [23:0] color0,
+    input [23:0] color1,
+    input [23:0] color2,
+    input [23:0] color3,
+    input [23:0] color4,
+    input [23:0] color5,
+    input [23:0] color6,
+    input [23:0] color7,
+
     output reg [7:0] R, G, B,
     output [7:0] current_tile   // NOTE, UPDATE TO 8:0 ONCE GRID CONTROLLER FIXED!!!!
     );
@@ -25,23 +34,20 @@ module pixel_gen_temp #(parameter  WIDTH=1920, HEIGHT=1080,
 
     // localparam TILES_PER_REG = 4;               // number of tiles per reg
     // localparam SPRITE_SIZE = 32;                // size of the sprite in pixels
-    localparam N_PER_ROW = 60;
     // localparam N_PER_COL = 33;  // actually 33.75, account for later...
+    localparam N_PER_ROW = 60;
 
     wire [12:0] offset_x, offset_y;
     // if in drawable region, offset to local coords
-    assign offset_x = x > 192 ? x - 192 : 0; // (H_SYNC_TIME + H_B_PORCH + H_LR_BORDER) 
-    assign offset_y = y > 41 ? y - 41 : 0; // (V_SYNC_TIME + V_B_PORCH + V_LR_BORDER)
+    assign offset_x = x - 192; // (H_SYNC_TIME + H_B_PORCH + H_LR_BORDER) 
+    assign offset_y = y - 41; // (V_SYNC_TIME + V_B_PORCH + V_LR_BORDER)
 
     // next, flatten 2d coords to current_tile
-//    assign current_tile = (((offset_x >> 5) + (N_PER_ROW*offset_y) >> 5) >> 3);
-    wire [11:0] x_comp, y_comp;
-    // assign x_comp = offset_x >> 5;
+    wire [5:0] x_comp;
+    wire [10:0] y_comp;
     assign x_comp = offset_x >> 5;
     assign y_comp = 60*(offset_y >> 5); // * N_PER_ROW
-    // assign y_comp = 60*(offset_y >> 5); // * N_PER_ROW
     assign current_tile = (x_comp + y_comp) >> 3;
-   
                                                                        
     // Now we need to specify the sprite data.                            
     wire[95:0] spriteDATA; // The total number of columns of data        
@@ -69,24 +75,23 @@ module pixel_gen_temp #(parameter  WIDTH=1920, HEIGHT=1080,
     // output block
     always @(*) begin 
         if (~vde) begin
-            {R, G, B} <= 24'h000000;
+            {R, G, B} = 24'h000000;
         end 
         else begin
             if(spritePIX_on) begin
                 case (spritePIX)
-                  0:  {R,G,B} = 24'h000000; // transparent
-                  1:  {R,G,B} = 24'h0000FF; // body outline
-                  2:  {R,G,B} = 24'h00FF00; // body color
-                  3:  {R,G,B} = 24'h000000; // eye color
-                  4:  {R,G,B} = 24'hFF0000; // spine color
-                  5:  {R,G,B} = 24'h000000;
-                  6:  {R,G,B} = 24'h000000;
-                  7:  {R,G,B} = 24'h000000;
-                  default: {R,G,B} = 24'h000000;
+                  0:  {R,G,B} = color0; // transparent
+                  1:  {R,G,B} = color1;
+                  2:  {R,G,B} = color2;
+                  3:  {R,G,B} = color3;
+                  4:  {R,G,B} = color4;
+                  5:  {R,G,B} = color5;
+                  6:  {R,G,B} = color6;
+                  7:  {R,G,B} = color7;
                 endcase
             end
             else begin                   
-                {R, G, B} <= 24'hFFFFFF;             // background  
+                {R, G, B} = 24'hFFFFFF;             // background  
             end 
         end
     end

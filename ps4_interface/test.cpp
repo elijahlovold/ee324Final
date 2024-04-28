@@ -128,7 +128,9 @@ int main() {
             write_array[0] = 0;
         }
 
-        test.write_raw(write_array, 1);
+        write_array[1] = 0;
+
+        test.write_raw(write_array, 2);
 
         test.read_raw(read_array);
         usleep(1000);
