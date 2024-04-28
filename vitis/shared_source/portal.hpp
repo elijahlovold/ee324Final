@@ -2,6 +2,7 @@
 
 #include "presets.hpp"
 #include "grid_controller.hpp"
+#include "audio_controller.hpp"
 
 class portal {
     public: 
@@ -30,6 +31,7 @@ bool portal::shoot_portal(unsigned int tar_x, unsigned int tar_y) {
     if (grid_controller::check_coords(tar_x, tar_y) == false) {
         return false;
     }
+
     // if already set, clear
     if (this->set) {
         this->delete_portal();
@@ -44,6 +46,7 @@ bool portal::shoot_portal(unsigned int tar_x, unsigned int tar_y) {
         this->y = tar_y;
     }
 
+    audio::play_audio(clip::PORTAL_PLACE);
     return this->set;
 }
 

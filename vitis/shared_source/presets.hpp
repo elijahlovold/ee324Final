@@ -10,9 +10,9 @@
 #define PERIOD 1000     // sets the period of the PWM
 
 #define GRID_CONTROLLER_BASE_ADDR 0x43C30000
+#define COLOR_CONTROLLER_BASE_ADDR 0x43C40000
+#define AUDIO_CONTROLLER_BASE_ADDR 0x43C50000
 
-// depricated, don't use
-// #define INPUT_CONTROLLER_BASE_ADDR 0x43C40000
 
 #define BUTTONS_BASEADDR 0x41200000		// Base address of the Buttons 
 #define LED_BASEADDR     0x41210000		// Base address of LED IP
@@ -46,10 +46,7 @@
 #define R_1_WIDTH 	0x43C00058
 
 
-
 #define GTC_BASE_ADDR 0xF8F00000
-
-// #define TIMER_BASE_ADDR 0x41250000
 #define UART_BASE_ADDR 0xE0001000
 
 #define MAX_SPRITE_ADDR 45
@@ -87,6 +84,30 @@ enum sp {
     WALL = 14, 
 
     ERROR = 999,
+};
+
+enum clip {
+    NONE = 0,
+    CHOMP = 1, 
+    PORTAL_PLACE = 2, 
+    PORTAL_TRAVEL = 3, 
+};
+
+struct RGB {
+    unsigned char R;
+    unsigned char G;
+    unsigned char B;
+
+    RGB(unsigned char r, unsigned char g, unsigned char b) : R(r), G(g), B(b) {}
+};
+
+enum color {
+    BODY_CORE = 1, 
+    PUPIL = 2,
+    IRIS_APPLE = 3, 
+    BODY_ACCENT_SEND = 4, 
+
+    RECIEVE = 7,
 };
 
 enum input_device {

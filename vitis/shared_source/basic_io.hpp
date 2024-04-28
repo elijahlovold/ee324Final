@@ -12,9 +12,8 @@ namespace io {
 
     // RGB functions
     void enable_all(uint32_t state, uint32_t period);
-    void RGB(uint32_t r, uint32_t g, uint32_t b, uint32_t led);
     void display_RGB(uint32_t leds, uint32_t width);
-
+    void RGB_led(RGB rgb, uint32_t led);
 
     /*************************************************************
      * Function: get_button_states ()                            *
@@ -166,7 +165,7 @@ namespace io {
         *((uint32_t *)G_0_PERIOD) = period;
         *((uint32_t *)B_0_PERIOD) = period;
         // initialize to 0
-        RGB(0,0,0,0);
+        RGB_led(RGB(0,0,0), 0);
 
         // enables RGB
         *((uint32_t *)R_1_EN) = state;
@@ -177,7 +176,7 @@ namespace io {
         *((uint32_t *)G_1_PERIOD) = period;
         *((uint32_t *)B_1_PERIOD) = period;
         // initialize to 0
-        RGB(0,0,0,1);
+        RGB_led(RGB(0,0,0), 0);
     }
 
     /*************************************************************
@@ -197,17 +196,17 @@ namespace io {
      * Preconditions: RGB must be enabled and period set.		 *
      * Postconditions: RGB is set to input color.		 		 *
      *************************************************************/
-    void RGB(uint32_t r, uint32_t g, uint32_t b, uint32_t led) {
+    void RGB_led(RGB rgb, uint32_t led) {
         if (led == 0) {
             // set the width of each color
-            *((uint32_t *)R_0_WIDTH) = r;
-            *((uint32_t *)G_0_WIDTH) = g;
-            *((uint32_t *)B_0_WIDTH) = b;
+            *((uint32_t *)R_0_WIDTH) = rgb.R;
+            *((uint32_t *)G_0_WIDTH) = rgb.G;
+            *((uint32_t *)B_0_WIDTH) = rgb.B;
         } else if (led == 1) {
             // set the width of each color
-            *((uint32_t *)R_1_WIDTH) = r;
-            *((uint32_t *)G_1_WIDTH) = g;
-            *((uint32_t *)B_1_WIDTH) = b;
+            *((uint32_t *)R_1_WIDTH) = rgb.R;
+            *((uint32_t *)G_1_WIDTH) = rgb.G;
+            *((uint32_t *)B_1_WIDTH) = rgb.B;
         }
     }
 
@@ -239,7 +238,7 @@ namespace io {
         }
 
         // write leds...
-        RGB(rgb[0], rgb[1], rgb[2], 0);
-        RGB(rgb[3], rgb[4], rgb[5], 1);
+        RGB_led(RGB(rgb[0],rgb[1],rgb[2]), 0);
+        RGB_led(RGB(rgb[3],rgb[4],rgb[5]), 1);
     }
 };

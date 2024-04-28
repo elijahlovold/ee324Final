@@ -23,9 +23,8 @@ class Snake {
         void set_direction(dir h_dir, inc np, snake_node &prev);
 
         bool step_snake();
-        void add_segment();
 
-        void read_controller();
+        unsigned char read_controller(bool game_state = true);
 
 
 };
@@ -113,40 +112,10 @@ bool Snake::step_snake() {
     return ret;
 }
 
-// void Snake::add_segment() {
-//     // first figure out where to add the tail
-//     unsigned int tail_x = this->snake[this->tail_i].get_coords(0);
-//     unsigned int tail_y = this->snake[this->tail_i].get_coords(1);
-
-//     unsigned int tail_1_x = this->snake[this->tail_i - 1].get_coords(0);
-//     unsigned int tail_1_y = this->snake[this->tail_i - 1].get_coords(1);
-
-//     int x_diff = tail_x - tail_1_x;
-//     int y_diff = tail_y - tail_1_y;
-//     // if diff in x, add along x direction
-//     if (x_diff != 0) {
-//         this->snake.push_back(snake_node(sp::TAIL, tail_x + x_diff, tail_y));
-//     } 
-//     // else, add along y direction  
-//     else {
-//         this->snake.push_back(snake_node(sp::TAIL, tail_x, tail_y + y_diff));
-//     }
-
-//     // now, update old tail sprite
-//     this->snake[this->tail_i].set_sprite(sp::BODY);
-
-//     // update length and tail index
-//     this->length = this->snake.size();
-//     this->tail_i = length - 1;
-// }
-
-void Snake::read_controller() {
+unsigned char Snake::read_controller(bool game_state) {
     // first, send over some info
-    for (int i = 0; i < 8; i++) {
-        uart::send_char_UART1(56);
-    }
-    // next, read back controller info byte
-    unsigned char temp = uart::read_char_UART1(); 
+    RGB test(0, 255, 0);
+    unsigned char temp = uart::ps4_transfer(test, game_state);
 
     if (temp == 22) {
         this->set_direction(dir::VERT, inc::NEG, snake_body[0]);
@@ -181,4 +150,5 @@ void Snake::read_controller() {
         } 
         this->head.reciever.shoot_portal(x, y);
     }
+    return temp;
 }

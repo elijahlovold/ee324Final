@@ -2,6 +2,7 @@
 
 #include "presets.hpp"
 #include "snake_node.hpp"
+#include "audio_controller.hpp"
 
 // inherit from snake_node
 class snake_head : public snake_node {
@@ -103,6 +104,8 @@ class snake_head : public snake_node {
                     // next, check if the output is a valid destination
                     sp dst_spt = grid_controller::get_sprite(x, y);
 
+                    audio::play_audio(clip::PORTAL_TRAVEL);
+
                     // two valid cases:
                     if (dst_spt == sp::TRANSPARENT || dst_spt == sp::FOOD) {
                         // send snake head to destination
@@ -128,6 +131,8 @@ class snake_head : public snake_node {
                     
                     // spawn a new food
                     spawn_food();
+
+                    audio::play_audio(clip::CHOMP);  // output none
                     return true;
                 } 
 

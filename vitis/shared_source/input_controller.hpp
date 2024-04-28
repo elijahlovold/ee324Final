@@ -6,11 +6,7 @@ namespace controller {
 
 unsigned char read_input(Snake *p1) {
     // read in p1 movement
-    p1->read_controller();
-    // read in dump data
-    uart::read_char_UART1();
-
-    return 0;
+    return p1->read_controller();
 }
 
 unsigned char read_input(Snake* p1, Snake* p2) {

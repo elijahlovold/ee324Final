@@ -80,8 +80,8 @@ set_property -dict { PACKAGE_PIN K18   IOSTANDARD LVCMOS33 } [get_ports { cathod
 #set_property -dict { PACKAGE_PIN N15   IOSTANDARD LVCMOS33 } [get_ports { M_clk }]; #IO_L21P_T3_DQS_AD14P_35 Schematic=M_CLK
 #set_property -dict { PACKAGE_PIN L14   IOSTANDARD LVCMOS33 } [get_ports { M_data }]; #IO_L22P_T3_AD7P_35 Schematic=M_DATA
 
-##Speaker
-#set_property -dict { PACKAGE_PIN G18  IOSTANDARD LVCMOS33 } [get_ports { audio }]; #IO_L16N_T2_35 Schematic=AUDIO
+#Speaker
+set_property -dict { PACKAGE_PIN G18  IOSTANDARD LVCMOS33 } [get_ports { audio }]; #IO_L16N_T2_35 Schematic=AUDIO
 
 #HDMI Signals
 set_property -dict { PACKAGE_PIN U19   IOSTANDARD TMDS_33 } [get_ports hdmi_clk_n]; #IO_L12N_T1_MRCC_34 Sch=HDMI_TX_CLK_N
