@@ -1,21 +1,27 @@
 module play_audio(
     input play, stop, // Send from software
     input clk, rst, 
-    input [1:0]soundchoice, // Choose in software
+    input [2:0]soundchoice, // Choose in software
     output reg audio
 );
 // value = 100MHz / (1/(audiofileLength) * SampleSize)
-    wire [14:0] chomp_addr;
+    wire [11:0] chomp_addr;
     wire [7:0] chomp_data;
     wire chomp_pwm;
-    wire [15:0] PortalPlace_addr;
+    wire [11:0] PortalPlace_addr;
     wire [7:0] PortalPlace_data;
     wire PortalPlace_pwm;
-    wire [16:0] PortalTravel_addr;
+    wire [13:0] PortalTravel_addr;
     wire [7:0] PortalTravel_data;
     wire PortalTravel_pwm;
+    wire [13:0] Move_addr;
+    wire [7:0] Move_data;
+    wire Move_pwm;
+    wire [13:0] GameOver_addr;
+    wire [7:0] GameOver_data;
+    wire GameOver_pwm;
 
-    wire chomp_on, place_on, travel_on;
+    wire chomp_on, place_on, travel_on, move_on, gameover_on;
 
     audio_controller #(22706, 2158) control_chomp(clk, rst, play, chomp_addr, chomp_on);
     chomp_rom chomp(clk, chomp_addr, chomp_data);
@@ -29,6 +35,14 @@ module play_audio(
     PortalTravel_rom PortalTravel(clk, PortalTravel_addr, PortalTravel_data);
     PWM pwm_PortalTravel(clk, rst, PortalTravel_data, PortalTravel_pwm);
     
+    audio_controller #(22520, 4263) control_Move(clk, rst, play, Move_addr, move_on);
+    Move_rom Move(clk, Move_addr, Move_data);
+    PWM pwm_Move(clk, rst, Move_data, Move_pwm);
+
+    audio_controller #(22653, 14170) control_GameOver(clk, rst, play, GameOver_addr, gameover_on);
+    GameOver_rom GameOver(clk, GameOver_addr, GameOver_data);
+    PWM pwm_GameOver(clk, rst, GameOver_data, GameOver_pwm);
+    
     always @ (posedge clk, posedge rst) begin
         if(rst) begin
             audio <= 0;
@@ -39,6 +53,8 @@ module play_audio(
                 1: audio <= chomp_pwm & chomp_on; // PWM modded output
                 2: audio <= PortalPlace_pwm & place_on;
                 3: audio <= PortalTravel_pwm & travel_on;
+                4: audio <= Move_pwm & move_on;
+                5: audio <= GameOver_pwm & gameover_on;
             endcase
         end
     end
