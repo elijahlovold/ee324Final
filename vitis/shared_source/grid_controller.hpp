@@ -10,9 +10,11 @@ namespace grid_controller {
 
     void clear_grid(sp addr = sp::TRANSPARENT);
 
-    void load_map(mp_i map_index);
-
     sp get_sprite(unsigned int x, unsigned int y);
+    
+    bool draw_wall_x(unsigned int y, unsigned int x1, unsigned int x2);
+    bool draw_wall_y(unsigned int x, unsigned int y1, unsigned int y2);
+
 
     sp get_sprite(unsigned int x, unsigned int y) {
         unsigned int flat_coords = flatten_coords(x, y);    
@@ -95,4 +97,16 @@ namespace grid_controller {
         return (x < MAX_X_COORDS && y < MAX_Y_COORDS);
     } 
 
-};
+    bool draw_wall_x(unsigned int y, unsigned int x1, unsigned int x2) {
+        for (int i = x1; i <= x2; i++) { 
+            grid_controller::set_sprite(i, y, sp::WALL);
+        }
+    }
+    
+    bool draw_wall_y(unsigned int x, unsigned int y1, unsigned int y2) {
+        for (int i = y1; i <= y2; i++) { 
+            grid_controller::set_sprite(x, i, sp::WALL);
+        }
+    }
+
+}

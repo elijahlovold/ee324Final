@@ -56,24 +56,30 @@ int main() {
 
     JslSetLightColour(handle, rgb_to_hex(current_color));
      
-    // while(1) {
-    //     read_gyro(handle);
-    //     usleep(300000);
-    // }
-
     input_mode mode = STICKS;
+    unsigned char cmd;
+    unsigned char prev_cmd = 0;
+
     while(1) {
         switch (mode) {
             case STICKS:
-                write_array[0] = decode_sticks(handle, mode);
+                cmd = decode_sticks(handle, mode);
                 break;
             case GYRO:
-                write_array[0] = decode_gyro(handle, mode);
+                cmd = decode_gyro(handle, mode);
                 break;
             case PAD: 
                 // write_array[0] = decode_pad(handle, mode);
-                write_array[0] = decode_sticks(handle, mode);
+                cmd = decode_sticks(handle, mode);
                 break;
+        }
+
+        // if previous cmd, skip
+        if (cmd == prev_cmd) {
+            write_array[0] = 0;
+        } else {
+            write_array[0] = cmd;
+            prev_cmd = cmd;
         }
 
         // write_array[0] = decode_sticks(handle, mode);

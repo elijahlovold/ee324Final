@@ -23,8 +23,6 @@ class snake_node {
         unsigned int coord_y;       // grid tile the node is on 
 
     protected: 
-        dir_big node_dir;
-
         sp node_sprite;  // only need 8 bytes
  };
 

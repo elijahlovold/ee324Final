@@ -17,6 +17,7 @@
 #include "colors.hpp"
 
 int shared_main() {    
+
     io::output_to_LEDs(0b111111);
 
     io::enable_all(1, PERIOD);    // enable RGBs, set period to PERIOD
@@ -34,6 +35,9 @@ int shared_main() {
 
     uart::setup_UART1();    // computer comms for ps4 controller
 
+    // set number of snakes to 0
+    // Snake::num_instances = 0;
+
     RGB game_color(255, 255, 255);
     while (1) {
         // first, clear the grid
@@ -44,17 +48,26 @@ int shared_main() {
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 5*4)) = 0x00000002;
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 6*4)) = 0x00000002;
 
-        grid_controller::set_sprite(9, 15, sp::WALL);
-        grid_controller::set_sprite(9, 16, sp::WALL);
-        grid_controller::set_sprite(9, 17, sp::WALL);
-        grid_controller::set_sprite(9, 18, sp::WALL);
+        // add side walls
+        grid_controller::draw_wall_y(0, 0, MAX_Y_COORDS);
+        grid_controller::draw_wall_y(1, 0, MAX_Y_COORDS);
+        grid_controller::draw_wall_y(2, 0, MAX_Y_COORDS);
+        grid_controller::draw_wall_y(3, 0, MAX_Y_COORDS);
+
+        grid_controller::draw_wall_y(MAX_X_COORDS/2, 0, MAX_Y_COORDS);
+
+        grid_controller::draw_wall_y(MAX_X_COORDS - 1, 0, MAX_Y_COORDS);
+        grid_controller::draw_wall_y(MAX_X_COORDS - 2, 0, MAX_Y_COORDS);
+        grid_controller::draw_wall_y(MAX_X_COORDS - 3, 0, MAX_Y_COORDS);
+        grid_controller::draw_wall_y(MAX_X_COORDS - 4, 0, MAX_Y_COORDS);
+        
 
 
         // first, instantiate a snake object
         // will create in the center of the screen
         // create the snake starting with default length
-        Snake player1;
-        // Snake player2(20, 15);
+        Snake player1 (15, 15);
+        // Snake player2(45, 15);
 
         // wait for player to start game while seeding random generator
         io::setup_SevenSeg(3);  // custom mode
@@ -73,7 +86,7 @@ int shared_main() {
         io::output_to_SevenSeg(0);  // clear
 
         // spawn the initial fruit on the map
-        spawn_food();
+        food::randomize();
 
         bool game_pause = false;
         bool game_play = true;
@@ -83,9 +96,13 @@ int shared_main() {
 
             // unsigned char data = controller::read_input(&player1);
             unsigned char data = player1.read_controller(game_play);
-            
 
-            game_pause = (data == 14);
+            food::check_food(); 
+
+            if (data == CMDS::START) {
+                game_pause = !game_pause;
+                audio::play_audio(clip::PING);
+            }
 
             // if game update timer elapsed, increment player position
             // switch 1 must be high to run the game

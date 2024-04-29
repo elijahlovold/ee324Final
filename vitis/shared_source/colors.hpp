@@ -14,7 +14,7 @@ namespace colors {
         set_color(color::PUPIL, RGB(0,0,0));    // pupil
         set_color(color::IRIS_APPLE, RGB(255,0,0));    // iris
         set_color(color::BODY_ACCENT_SEND, RGB(0,110,67));
-        set_color(5, RGB(255,0,0));
+        set_color(5, RGB(0,210,234));
         set_color(6, RGB(255,0,255));
         set_color(color::RECIEVE, RGB(255,255,0));  // recieve portal 
     }

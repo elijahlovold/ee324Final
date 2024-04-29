@@ -4,21 +4,33 @@
 #include "snake_node.hpp"
 #include "snake_head.hpp"
 #include "snake_tail.hpp"
+#include "colors.hpp"
 
 class Snake {
     public:
+        // static int num_instances;
+
+        int instance;
+
         input_device dev;
 
         unsigned int length;
 
         unsigned int s_x, s_y;
 
+        unsigned int body_color_i;
+
         std::vector<snake_node> snake_body;
         snake_head head;
         snake_tail tail;
 
         Snake(unsigned int x = 30, unsigned int y = 15, unsigned int length = SNAKE_LENGTH);
-        
+
+        // when deleted, decrement number of snakes
+        ~Snake() {
+            // Snake::num_instances--;
+        }        
+
         void reset_snake();
         void set_direction(dir h_dir, inc np, snake_node &prev);
 
@@ -26,11 +38,21 @@ class Snake {
 
         unsigned char read_controller(bool game_state = true);
 
+        void set_color();
+        void inc_color();
+        void dec_color();
+
 
 };
 
 Snake::Snake(unsigned int x, unsigned int y, unsigned int length) :
-    length(length), head(snake_head(0, 0, dir::VERT, inc::NEG)), tail(snake_tail(0, 0)) {
+    length(length), body_color_i(1), head(snake_head(0, 0, dir::VERT, inc::NEG)), tail(snake_tail(0, 0)) {
+
+    // this->instance = Snake:num_instances;
+    // Snake::num_instances++;
+    this->instance = 0;
+
+    this->set_color();
 
     if (grid_controller::check_coords(x,y)) {
         this->s_x = x;
@@ -114,8 +136,7 @@ bool Snake::step_snake() {
 
 unsigned char Snake::read_controller(bool game_state) {
     // first, send over some info
-    RGB test(0, 255, 0);
-    unsigned char temp = uart::ps4_transfer(test, game_state);
+    unsigned char temp = uart::ps4_transfer(color_presets[this->body_color_i], game_state);
 
     if (temp == 22) {
         this->set_direction(dir::VERT, inc::NEG, snake_body[0]);
@@ -153,5 +174,33 @@ unsigned char Snake::read_controller(bool game_state) {
         audio::play_audio(clip::PING);
     }
 
+    else if (temp == CMDS::INC_COLOR) {
+        this->inc_color(); 
+    } else if (temp == CMDS::DEC_COLOR) {
+        this->dec_color(); 
+    }
     return temp;
+}
+
+void Snake::set_color() {
+    colors::set_color(color::BODY_CORE, color_presets[this->body_color_i]); 
+    io::RGB_led(color_presets[this->body_color_i], this->instance);
+}
+
+void Snake::inc_color() {
+    if (this->body_color_i == NUM_COLORS - 1) {
+        this->body_color_i = 0;
+    } else {
+        this->body_color_i++;
+    }
+    this->set_color();
+}
+
+void Snake::dec_color() {
+    if (this->body_color_i == 0) {
+        this->body_color_i = NUM_COLORS - 1;
+    } else {
+        this->body_color_i--;
+    }
+    this->set_color();
 }

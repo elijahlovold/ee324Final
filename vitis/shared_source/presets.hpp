@@ -103,6 +103,24 @@ struct RGB {
     RGB(unsigned char r, unsigned char g, unsigned char b) : R(r), G(g), B(b) {}
 };
 
+#define NUM_COLORS 6
+RGB color_presets[] = {RGB(255,0,0), RGB(0,255,0), RGB(0,0,255), RGB(255,255,0), RGB(255,0,255), RGB(0,255,255)};
+
+enum CMDS {
+    UP = 22,
+    DOWN = 23, 
+    RIGHT = 20, 
+    LEFT = 21, 
+
+    PORTAL1 = 8, 
+    PORTAL2 = 7, 
+
+    START = 14,
+
+    INC_COLOR = 18,
+    DEC_COLOR = 19
+};
+
 enum color {
     BODY_CORE = 1, 
     PUPIL = 2,
@@ -117,13 +135,6 @@ enum input_device {
     BOARD = 1
 };
 
-enum dir_big {
-    UP = 0, 
-    DOWN = 1, 
-    RIGHT = 2, 
-    LEFT = 3
-}; 
-
 enum dir {
     HORI = 0,
     VERT = 1
@@ -132,18 +143,6 @@ enum dir {
 enum inc {
     POS = 1,
     NEG = -1, 
-};
-
-enum inputs {
-    UP_I = 0, 
-    DOWN_I = 1, 
-    RIGHT_I = 2, 
-    LEFT_I = 3, 
-
-    PORTAL1 = 10,
-    PORTAL2 = 11, 
-    BOOST = 12, 
-
 };
 
 // enum portal_type {

@@ -131,9 +131,25 @@ class snake_head : public snake_node {
                     grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
                     
                     // spawn a new food
-                    spawn_food();
+                    food::randomize();
                     return true;
-                } 
+                }
+
+                // same as above
+                case sp::FOOD_TEL: {
+                    audio::play_audio(clip::CHOMP);  // output none
+
+                    // increment the food eaten tracker
+                    this->food_eaten++;
+                    io::output_to_SevenSeg(this->food_eaten);
+
+                    // replace food with head
+                    grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
+                    
+                    // spawn a new food
+                    food::randomize();
+                    return true;
+                }
 
                 // default case is assumed to be a collision
                 default: {
