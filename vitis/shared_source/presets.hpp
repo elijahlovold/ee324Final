@@ -9,7 +9,7 @@
 
 #define PERIOD 1000     // sets the period of the PWM
 
-#define GRID_CONTROLLER_BASE_ADDR 0x43C30000
+#define GRID_CONTROLLER_BASE_ADDR 0x43C20000
 #define COLOR_CONTROLLER_BASE_ADDR 0x43C40000
 #define AUDIO_CONTROLLER_BASE_ADDR 0x43C50000
 
@@ -55,8 +55,12 @@
 #define Y_RES 1080
 #define SPRITE_RES 32
 
-#define MAX_X_COORDS 60
-#define MAX_Y_COORDS 33
+#define MAX_X_COORD 63
+#define MIN_X_COORD 3
+#define MAX_Y_COORD 32
+#define MIN_Y_COORD 1
+
+#define REG_PER_ROW 8
 
 #define SNAKE_LENGTH 5
 
@@ -103,9 +107,26 @@ struct RGB {
     RGB(unsigned char r, unsigned char g, unsigned char b) : R(r), G(g), B(b) {}
 };
 
-#define NUM_COLORS 6
-RGB color_presets[] = {RGB(255,0,0), RGB(0,255,0), RGB(0,0,255), RGB(255,255,0), RGB(255,0,255), RGB(0,255,255)};
-
+#define NUM_COLORS 17
+// RGB color_presets[] = {RGB(255,0,0), RGB(0,255,0), RGB(0,0,255), RGB(255,255,0), RGB(255,0,255), RGB(0,255,255), RGB(150,0,255)};
+RGB color_presets[] = {
+    RGB(255, 0, 0),     // Red
+    RGB(220, 20, 60),     // Crimson
+    RGB(178, 34, 34),     // Fire Brick
+    RGB(255, 127, 0),   // Orange
+    RGB(255, 165, 0),   // Lighter Orange
+    RGB(255, 255, 0),   // Yellow
+    RGB(173, 255, 47),  // Spring Green
+    RGB(0, 255, 0),     // Green
+    RGB(173, 216, 230),   // Light Blue
+    RGB(0, 255, 255),   // Cyan
+    RGB(0, 191, 255),     // Deep Sky Blue
+    RGB(0, 0, 255),     // Blue
+    RGB(65, 105, 225),    // Royal Blue
+    RGB(138, 43, 226),  // Darker Violet
+    RGB(148, 0, 211),   // Violet
+    RGB(75, 0, 130),    // Indigo
+};
 enum CMDS {
     UP = 22,
     DOWN = 23, 

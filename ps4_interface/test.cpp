@@ -75,6 +75,7 @@ int main() {
         }
 
         // if previous cmd, skip
+        // if (cmd == prev_cmd && cmd < 20 && cmd > 23) {
         if (cmd == prev_cmd) {
             write_array[0] = 0;
         } else {

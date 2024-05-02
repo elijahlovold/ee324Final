@@ -30,8 +30,8 @@ module sim();
     wire [7:0] current_tile;
     // create the display using default parameters
     VGA display (HS, VS, Vde, x_vga, y_vga, clk, rst);
-    pixel_gen_temp test(x_vga, y_vga, Vde, sprite_addr, clk, R, G, B, current_tile);
-
+    snake_gen test(x_vga, y_vga, clk, 'h0, 'hf, 'hf0, 'hff, 'hf00, 'hf0f, 'hff0, 'hfff, sprite_addr, clk, R, G, B, tile_x, tile_y);
+    grid_controller_32_2D_v1_0 test();
     // create the clock
     always begin
         #10

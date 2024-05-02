@@ -6,7 +6,7 @@
 // inherit from snake_node
 class snake_tail : public snake_node {
     public: 
-        snake_tail(int x, int y) : snake_node(sp::TAIL_UP, x, y) {}
+        snake_tail(int x = 0, int y = 0) : snake_node(sp::TAIL_UP, x, y) {}
 
         void move_tail(int x, int y, int d_x, int d_y) {
             // first update tail sprite

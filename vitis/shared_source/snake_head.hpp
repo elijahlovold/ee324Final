@@ -11,7 +11,7 @@ class snake_head : public snake_node {
         inc increment;
         unsigned int food_eaten;
 
-        snake_head(int x, int y, dir dir_in, inc inc_in) : snake_node(sp::HEAD_UP, x, y), sender(sp::PORTALS), reciever(sp::PORTALR), 
+        snake_head(dir dir_in, inc inc_in, int x = 0, int y = 0) : snake_node(sp::HEAD_UP, x, y), sender(sp::PORTALS), reciever(sp::PORTALR), 
                                                             food_eaten(0), direction(dir_in), increment(inc_in) {
             this->sender.set_corresponding(&reciever);
             this->reciever.set_corresponding(&sender);
@@ -105,8 +105,8 @@ class snake_head : public snake_node {
                     // next, check if the output is a valid destination
                     sp dst_spt = grid_controller::get_sprite(x, y);
 
-                    // two valid cases:
-                    if (dst_spt == sp::TRANSPARENT || dst_spt == sp::FOOD) {
+                    // three valid cases:
+                    if (dst_spt == sp::TRANSPARENT || dst_spt == sp::FOOD || dst_spt == sp::FOOD_TEL) {
                         // send snake head to destination
                         this->move_node(x, y);
                         return true;

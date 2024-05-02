@@ -46,7 +46,9 @@ class Snake {
 };
 
 Snake::Snake(unsigned int x, unsigned int y, unsigned int length) :
-    length(length), body_color_i(1), head(snake_head(0, 0, dir::VERT, inc::NEG)), tail(snake_tail(0, 0)) {
+    length(length), body_color_i(7), head(snake_head(dir::VERT, inc::NEG)), tail(snake_tail()) {
+
+    sp temp = grid_controller::get_sprite(0, 0);
 
     // this->instance = Snake:num_instances;
     // Snake::num_instances++;
@@ -62,12 +64,13 @@ Snake::Snake(unsigned int x, unsigned int y, unsigned int length) :
         this->s_y = 15;
     }
     // initialize snake with all nodes in center and all sprites snake body...
-    this->snake_body = std::vector<snake_node> (length, snake_node(sp::BODY, 0, 0));
+    this->snake_body = std::vector<snake_node> (length, snake_node(sp::BODY));
 
     // set the snake in the middle of the map
     this->reset_snake();
     
-    // link the portals
+    // replace what was initially there...
+    grid_controller::set_sprite(0, 0, temp);
     }
 
 // reset the snake to the initial conditions
@@ -127,6 +130,7 @@ bool Snake::step_snake() {
     if (ret && (this->head.food_eaten > prev_food)) {
         this->length++;
         this->snake_body.push_back(snake_node(sp::BODY, tail_x, tail_y));
+        this->snake_body[length-1].set_sprite(sp::BODY);
     } else {    // else, move the tail
         this->tail.move_tail(tail_x, tail_y, dir_x, dir_y);
     }

@@ -6,7 +6,6 @@
 
 namespace grid_controller {
     sp set_sprite(unsigned int x, unsigned int y, sp sprite_addr, bool check_collision = false); 
-    unsigned int flatten_coords(unsigned int x, unsigned int y);
 
     void clear_grid(sp addr = sp::TRANSPARENT);
 
@@ -17,20 +16,13 @@ namespace grid_controller {
 
 
     sp get_sprite(unsigned int x, unsigned int y) {
-        unsigned int flat_coords = flatten_coords(x, y);    
-        
-        // first grab the offset
-        unsigned int offset = (flat_coords >> 3);
+        unsigned int offset = y*REG_PER_ROW + (x >> 3);
 
         // grab the 32 bit sprite storing 4...
         unsigned int sprite = *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + offset*4));
 
         // figure out which byte it is by mod 4
-        if (y & 1) {
-            flat_coords -= 4;
-        } 
-        
-        unsigned int byte_position = (flat_coords % 8)*4;
+        unsigned int byte_position = (x % 8)*4;
 
         unsigned char existing_sprite = 0xF & (sprite >> byte_position);
 
@@ -39,23 +31,14 @@ namespace grid_controller {
 
     // if check_collision, will return true if collision detected
     sp set_sprite(unsigned int x, unsigned int y, sp sprite_addr, bool check_collision) { 
-        unsigned int flat_coords = flatten_coords(x, y);    
-        
-        // first grab the offset
-        unsigned int offset = (flat_coords >> 3);
+        unsigned int offset = y*REG_PER_ROW + (x >> 3);
 
         // grab the 32 bit sprite storing 4...
         unsigned int sprite = *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + offset*4));
 
-        // unsigned int sprite = 0xFFFFFFFF;
-
         // since, sprite contains 4 elements, only want to set the correct one 
         // figure out which byte it is by mod 4
-        if (y & 1) {
-            flat_coords -= 4;
-        }
-
-        unsigned int byte_position = (flat_coords % 8)*4;
+        unsigned int byte_position = (x % 8)*4;
 
         // if check_collision and not clearing, first see if a non-transparent sprite is there... 
         if (check_collision && (sprite_addr != sp::TRANSPARENT)) {
@@ -77,14 +60,11 @@ namespace grid_controller {
         return sp::TRANSPARENT;
     }
 
-    unsigned int flatten_coords(unsigned int x, unsigned int y) {
-        return y*MAX_X_COORDS + x;
-    }
 
     // completely wipe the grid
     void clear_grid(sp addr){
         unsigned char addr_v = static_cast<unsigned char>(addr) & 0xF;
-        for (int i = 0; i < 256; i++) {
+        for (int i = 0; i < 264; i++) {
             unsigned int val = 0;
             for (int j = 0; j < 8; j++) {
                 val |= (addr_v << 4*j);
@@ -94,7 +74,7 @@ namespace grid_controller {
     }
 
     bool check_coords(unsigned int x, unsigned int y) {
-        return (x < MAX_X_COORDS && y < MAX_Y_COORDS);
+        return (x < MAX_X_COORD && y < MAX_Y_COORD);
     } 
 
     bool draw_wall_x(unsigned int y, unsigned int x1, unsigned int x2) {
@@ -107,6 +87,13 @@ namespace grid_controller {
         for (int i = y1; i <= y2; i++) { 
             grid_controller::set_sprite(x, i, sp::WALL);
         }
+    }
+
+    void set_borders() {
+        draw_wall_y(0, 0, MAX_Y_COORD);
+        draw_wall_y(2, 0, MAX_Y_COORD);
+        draw_wall_y(4, 0, MAX_Y_COORD);
+        draw_wall_y(5, 0, MAX_Y_COORD);
     }
 
 }

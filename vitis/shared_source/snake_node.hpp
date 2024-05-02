@@ -10,7 +10,7 @@
 
 class snake_node {
     public: 
-        snake_node(sp sprite, unsigned int x, unsigned int y);
+        snake_node(sp sprite, unsigned int x = 0, unsigned int y = 0);
 
         bool set_coords(unsigned int x, unsigned int y);
         sp move_node(unsigned int x, unsigned int y, bool check_collision = false, bool replace = true);
@@ -27,7 +27,7 @@ class snake_node {
  };
 
 bool snake_node::set_coords(unsigned int x, unsigned int y) {
-    if (x > MAX_X_COORDS || y > MAX_Y_COORDS) {
+    if (x > MAX_X_COORD || y > MAX_Y_COORD) {
         io::output_to_SevenSeg(234);    // error indication
         return false;
     } else {
@@ -42,7 +42,7 @@ sp snake_node::move_node(unsigned int x, unsigned int y, bool check_collision, b
         grid_controller::set_sprite(this->coord_x, this->coord_y, sp::TRANSPARENT);
     }
 
-    if (x > MAX_X_COORDS || y > MAX_Y_COORDS) {
+    if (x > MAX_X_COORD || y > MAX_Y_COORD) {
         io::output_to_SevenSeg(234);    // error indication
         return sp::ERROR;
     } else {
@@ -80,5 +80,5 @@ snake_node::snake_node(sp sprite, unsigned int x, unsigned int y) {
         this->coord_x = x;
         this->coord_y = y;
     }
-    this->set_sprite(sprite);
+    this->node_sprite = sprite;
 }

@@ -27,8 +27,6 @@ int shared_main() {
 	io::setup_SevenSeg();        // enable 7-seg 
 
     Timer::GTC_enable();
-    Timer::GTC_set_period(500);    // set 1000ms period
-
     colors::default_colors();
 
     audio::enable_audio(0);
@@ -39,28 +37,29 @@ int shared_main() {
     // Snake::num_instances = 0;
 
     RGB game_color(255, 255, 255);
+
+    float period = 500;
+    Timer::GTC_set_period((unsigned int)(period));    // set 1000ms period
+
     while (1) {
+
         // first, clear the grid
         grid_controller::clear_grid();
         
+        // grid_controller::set_borders();
+
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 7*4)) = 0x00000002;
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 8*4)) = 0x22222222;
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 5*4)) = 0x00000002;
         // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 6*4)) = 0x00000002;
 
-        // add side walls
-        grid_controller::draw_wall_y(0, 0, MAX_Y_COORDS);
-        grid_controller::draw_wall_y(1, 0, MAX_Y_COORDS);
-        grid_controller::draw_wall_y(2, 0, MAX_Y_COORDS);
-        grid_controller::draw_wall_y(3, 0, MAX_Y_COORDS);
-
-        grid_controller::draw_wall_y(MAX_X_COORDS/2, 0, MAX_Y_COORDS);
-
-        grid_controller::draw_wall_y(MAX_X_COORDS - 1, 0, MAX_Y_COORDS);
-        grid_controller::draw_wall_y(MAX_X_COORDS - 2, 0, MAX_Y_COORDS);
-        grid_controller::draw_wall_y(MAX_X_COORDS - 3, 0, MAX_Y_COORDS);
-        grid_controller::draw_wall_y(MAX_X_COORDS - 4, 0, MAX_Y_COORDS);
-        
+        // // add side walls
+        // grid_controller::draw_wall_x(MIN_Y_COORD, 0, MAX_X_COORD);
+        // grid_controller::draw_wall_x(MAX_Y_COORD, 0, MAX_X_COORD);
+        // // center divider
+        grid_controller::draw_wall_x(15, MIN_X_COORD, MAX_X_COORD);
+        grid_controller::draw_wall_y((MAX_X_COORD - MIN_X_COORD)/2, MIN_Y_COORD, MAX_Y_COORD);
+        grid_controller::draw_wall_y((MAX_X_COORD - MIN_X_COORD)/2 + 5, MIN_Y_COORD, MAX_Y_COORD);
 
 
         // first, instantiate a snake object
@@ -90,30 +89,45 @@ int shared_main() {
 
         bool game_pause = false;
         bool game_play = true;
+        bool btn_pressed = false;
         while (game_play) {
             usleep(100);
-            player1.dev = static_cast<input_device>(io::get_switch(1));
 
             // unsigned char data = controller::read_input(&player1);
             unsigned char data = player1.read_controller(game_play);
-
-            food::check_food(); 
 
             if (data == CMDS::START) {
                 game_pause = !game_pause;
                 audio::play_audio(clip::PING);
             }
 
-            // if game update timer elapsed, increment player position
-            // switch 1 must be high to run the game
-            if (Timer::GTC_elapsed() && (game_pause != true)) {
-                // display number of seconds played
-                game_play = player1.step_snake();
+            if (!btn_pressed) {
+                if (io::get_button_states()&1) {
+                period *= 0.8;
+                Timer::GTC_set_period((unsigned int)(period));    // set 1000ms period
+                btn_pressed = true;
+                } else if (io::get_button_states()&0b10) {
+                period *= 1.25;
+                Timer::GTC_set_period((unsigned int)(period));    // set 1000ms period
+                btn_pressed = true;
+                }             
+            } else if (io::get_button_states() == 0){
+                btn_pressed = false;
+            }
+
+            if (game_pause == false) {
+                food::check_food(); 
+
+                // if game update timer elapsed, increment player position
+                // switch 1 must be high to run the game
+                if (Timer::GTC_elapsed()) {
+                    // display number of seconds played
+                    game_play = player1.step_snake();
+                }
             }
         }
         
         // end of game handler, display information...
-
         uart::ps4_transfer(RGB(255,0,0), false);
 
         audio::play_audio(clip::GAME_OVER); // output none

@@ -13,8 +13,8 @@ namespace food {
 
     void randomize() {
         while (1) {
-            food::x = rand()%MAX_X_COORDS;
-            food::y = rand()%MAX_Y_COORDS;
+            food::x = rand()%MAX_X_COORD;
+            food::y = rand()%MAX_Y_COORD;
 
             sp res = grid_controller::set_sprite(x, y, sp::FOOD, true);
 
@@ -38,6 +38,7 @@ namespace food {
         if (elapsed > 800) {
             // clear food
             grid_controller::set_sprite(x, y, sp::TRANSPARENT);    
+            audio::play_audio(clip::PORTAL_TRAVEL);
             // move
             food::randomize();
 

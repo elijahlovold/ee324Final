@@ -80,9 +80,9 @@ unsigned char decode_general(int controller_id, input_mode &mode) {
     } else if ((info.buttons & JSMASK_ZL) != 0) {   // left trigger
         return CMDS::PORTAL2;
     } else if ((info.buttons & JSMASK_R) != 0) {    // right bumper
-        return CMDS::DEC_COLOR;
-    } else if ((info.buttons & JSMASK_L) != 0) {    // left bumper
         return CMDS::INC_COLOR;
+    } else if ((info.buttons & JSMASK_L) != 0) {    // left bumper
+        return CMDS::DEC_COLOR;
     }
     else if ((info.buttons & JSMASK_OPTIONS) != 0) {    // options button
         return CMDS::START;
