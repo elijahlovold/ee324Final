@@ -51,21 +51,12 @@ int shared_main() {
         // first, instantiate a snake object
         // will create in the center of the screen
         // create the snake starting with default length
-        Snake player1 (13, 31);
-        player1.head.direction = dir::HORI;
-        player1.head.increment = inc::POS;
-        player1.head.set_sprite(sp::HEAD_RIGHT);
-        player1.tail.set_sprite(sp::TAIL_RIGHT);
-
+        Snake player1 (13, 31, SNAKE_LENGTH, 1);
         // always spawn in snake 1
         player1.reset_snake();
 
-        Snake player2(58, 4);
-        player2.head.direction = dir::HORI;
-        player2.head.increment = inc::NEG;
-        player2.head.set_sprite(sp::HEAD_LEFT);
-        player2.tail.set_sprite(sp::TAIL_LEFT);
-        // spawn in player 2 when joined...
+        Snake player2(58, 4, SNAKE_LENGTH, 2);
+       // spawn in player 2 when joined...
 
         // wait for player to start game while seeding random generator
         io::setup_SevenSeg(3);  // custom mode

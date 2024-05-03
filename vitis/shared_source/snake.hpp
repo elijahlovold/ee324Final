@@ -27,12 +27,7 @@ class Snake {
         snake_head head;
         snake_tail tail;
 
-        Snake(unsigned int x = 30, unsigned int y = 15, unsigned int length = SNAKE_LENGTH);
-
-        // when deleted, decrement number of snakes
-        // ~Snake() {
-        //     // Snake::num_instances--;
-        // }        
+        Snake(unsigned int x = 30, unsigned int y = 15, unsigned int length = SNAKE_LENGTH, int instance = 0);
 
         void reset_snake();
         void kill_snake();
@@ -52,14 +47,14 @@ class Snake {
 
 };
 
-Snake::Snake(unsigned int x, unsigned int y, unsigned int length) :
+Snake::Snake(unsigned int x, unsigned int y, unsigned int length, int instance) :
     range(5), alive(false), length(length), body_color_i(7), head(snake_head(dir::VERT, inc::NEG)), tail(snake_tail()) {
 
     sp temp = grid_controller::get_sprite(0, 0);
 
     // this->instance = Snake:num_instances;
     // Snake::num_instances++;
-    this->instance = 0;
+    this->instance = instance;
 
     this->set_color();
 
@@ -81,6 +76,7 @@ Snake::Snake(unsigned int x, unsigned int y, unsigned int length) :
 // kill the snake
 void Snake::kill_snake() {
     this->alive = false;
+    this->head.food_eaten = 0;
 }
 
 // clear the body
@@ -89,18 +85,38 @@ void Snake::clear_snake() {
         this->snake_body[i].clear_node();
     }
 
-    this->head.clear_node();
     this->tail.clear_node();
 }
 
 // reset the snake to the initial conditions
 void Snake::reset_snake() {
     this->clear_snake();
+    
+    if (this->instance == 1) {
+        this->head.direction = dir::HORI;
+        this->head.increment = inc::POS;
+        this->head.node_sprite = sp::HEAD_RIGHT;
+        this->tail.node_sprite = sp::TAIL_RIGHT;
+    } else if (this->instance == 2) {
+        this->head.direction = dir::HORI;
+        this->head.increment = inc::NEG;
+        this->head.node_sprite = sp::HEAD_LEFT;
+        this->tail.node_sprite = sp::HEAD_LEFT;
+    }
+
+    this->length = SNAKE_LENGTH;
+    sp temp = grid_controller::get_sprite(0, 0);
+
+    // // initialize snake with all nodes in center and all sprites snake body...
+    this->snake_body = std::vector<snake_node> (length, snake_node(sp::BODY));
+
+    // replace what was initially there...
+    grid_controller::set_sprite(0, 0, temp);
 
     this->alive = true;
 
     // set the head
-    this->head.move_node(this->s_x, this->s_y);
+    this->head.move_node(this->s_x, this->s_y, false, false);
 
     // determine the direction 
     if (this->head.direction == dir::HORI) {
@@ -149,7 +165,7 @@ bool Snake::step_snake() {
     unsigned int prev_food = this->head.food_eaten;
 
     bool step = this->head.step_head();
-
+    
     // if successful and a food was eaten, grow snake
     if (this->head.food_eaten > prev_food) {
         this->length++;

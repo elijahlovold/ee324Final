@@ -13,8 +13,8 @@ namespace food {
 
     void randomize() {
         while (1) {
-            food::x = MIN_X_COORD + rand()%(MAX_X_COORD - 1);
-            food::y = MIN_Y_COORD + rand()%(MAX_Y_COORD - 1);
+            food::x = MIN_X_COORD + rand()%(MAX_X_COORD - MIN_X_COORD + 1);
+            food::y = MIN_Y_COORD + rand()%(MAX_Y_COORD - MIN_Y_COORD + 1);
 
             sp res = grid_controller::set_sprite(x, y, sp::FOOD, true);
 

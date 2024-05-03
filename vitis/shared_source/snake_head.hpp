@@ -84,6 +84,7 @@ class snake_head : public snake_node {
                     // if not, clear 
                     if (this->reciever.set == false) {
                         grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
+                        this->sender.set == false;
                         return true;
                     }
 
@@ -117,6 +118,7 @@ class snake_head : public snake_node {
 
                 case sp::PORTALR: {
                     grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
+                    this->reciever.set = false;
                     return true;
                 }
 
