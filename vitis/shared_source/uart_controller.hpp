@@ -46,6 +46,47 @@ namespace uart {
 		return *((unsigned int *)(UART_BASE_ADDR + 0x30));
 	}
 
+	void ps4_write(RGB color, bool game_state = true) {
+		// send color 1
+		send_char_UART1(color.R);
+		send_char_UART1(color.G);
+		send_char_UART1(color.B);
+
+		// send over game state
+		send_char_UART1(static_cast<unsigned int>(game_state));
+
+		// send zeros
+		send_char_UART1(0);
+		send_char_UART1(0);
+		send_char_UART1(0);
+		send_char_UART1(0);
+	}
+	
+	unsigned char ps4_read() {
+		return read_char_UART1(); 
+	}
+
+	// unsigned char ps4_transfer(RGB color, bool game_state = true) {
+	// 	// first, send over colors
+	// 	send_char_UART1(color.R);
+	// 	send_char_UART1(color.G);
+	// 	send_char_UART1(color.B);
+
+	// 	// send over game state
+	// 	send_char_UART1(static_cast<unsigned int>(game_state));
+
+	// 	// zero fill the rest
+	// 	for (int i = 0; i < 4; i++) {
+	// 		send_char_UART1(56);
+	// 	}
+
+	// 	// next, read back controller info byte
+	// 	unsigned char response = read_char_UART1(); 
+	// 	unsigned char test = read_char_UART1(); 
+		
+	// 	return response;
+	// }
+
 	unsigned char ps4_transfer(RGB color, bool game_state = true) {
 		// first, send over colors
 		send_char_UART1(color.R);

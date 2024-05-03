@@ -9,7 +9,7 @@
 
 #define PERIOD 1000     // sets the period of the PWM
 
-#define GRID_CONTROLLER_BASE_ADDR 0x43C20000
+#define GRID_CONTROLLER_BASE_ADDR 0x43C30000
 #define COLOR_CONTROLLER_BASE_ADDR 0x43C40000
 #define AUDIO_CONTROLLER_BASE_ADDR 0x43C50000
 
@@ -55,9 +55,9 @@
 #define Y_RES 1080
 #define SPRITE_RES 32
 
-#define MAX_X_COORD 63
-#define MIN_X_COORD 3
-#define MAX_Y_COORD 32
+#define MAX_X_COORD 65
+#define MIN_X_COORD 6
+#define MAX_Y_COORD 34
 #define MIN_Y_COORD 1
 
 #define REG_PER_ROW 8
@@ -137,6 +137,9 @@ enum CMDS {
     PORTAL2 = 7, 
 
     START = 14,
+    MINUS = 15,
+
+    RANGE = 16,
 
     INC_COLOR = 18,
     DEC_COLOR = 19
@@ -166,6 +169,76 @@ enum inc {
     NEG = -1, 
 };
 
+struct wall_seg {
+    dir d;
+    unsigned int c;
+    unsigned int b1;
+    unsigned int b2;
+    wall_seg(dir d, unsigned int c, unsigned int b1, unsigned int b2) : d(d), c(c), b1(b1), b2(b2) {}
+};
+
+
+std::vector<std::vector<wall_seg>> maps = {
+    {},
+    {
+    wall_seg(dir::VERT, 30, 4, 18), 
+    wall_seg(dir::VERT, 40, 4, 18), 
+    wall_seg(dir::VERT, 20, 22, 28), 
+    wall_seg(dir::VERT, 50, 22, 28), 
+    wall_seg(dir::HORI, 28, 20, 50), 
+    }, 
+    {
+    wall_seg(dir::HORI, 17, MIN_X_COORD, MAX_X_COORD), 
+    wall_seg(dir::VERT, 35, MIN_Y_COORD, MAX_Y_COORD), 
+    },
+    {
+    wall_seg(dir::HORI, 10, 15, 56), 
+    wall_seg(dir::HORI, 25, 15, 56), 
+    wall_seg(dir::VERT, 15, 10, 25), 
+    wall_seg(dir::VERT, 56, 10, 25), 
+    },
+    {
+    wall_seg(dir::HORI, 5, MIN_X_COORD, 34), 
+    wall_seg(dir::HORI, 10, 35, MAX_X_COORD), 
+    wall_seg(dir::HORI, 15, MIN_X_COORD, 34), 
+    wall_seg(dir::HORI, 20, 35, MAX_X_COORD), 
+    wall_seg(dir::HORI, 25, MIN_X_COORD, 34), 
+    wall_seg(dir::HORI, 30, 35, MAX_X_COORD), 
+    }, 
+    {
+    wall_seg(dir::HORI, 10, MIN_X_COORD, 15), 
+    wall_seg(dir::HORI, 10, 56, MAX_X_COORD), 
+    wall_seg(dir::HORI, 25, MIN_X_COORD, 15), 
+    wall_seg(dir::HORI, 25, 56, MAX_X_COORD), 
+    wall_seg(dir::VERT, 15, MIN_Y_COORD, 10), 
+    wall_seg(dir::VERT, 15, 25, MAX_Y_COORD), 
+    wall_seg(dir::VERT, 56, MIN_Y_COORD, 10), 
+    wall_seg(dir::VERT, 56, 25, MAX_Y_COORD), 
+    wall_seg(dir::HORI, 17, 34, 35), 
+    wall_seg(dir::HORI, 18, 34, 35), 
+    }, 
+    {
+    wall_seg(dir::HORI, 13, MIN_X_COORD, MAX_X_COORD), 
+    wall_seg(dir::HORI, 22, MIN_X_COORD, MAX_X_COORD), 
+    wall_seg(dir::VERT, 30, MIN_Y_COORD, MAX_Y_COORD), 
+    wall_seg(dir::VERT, 40, MIN_Y_COORD, MAX_Y_COORD), 
+    }, 
+    {
+    wall_seg(dir::HORI, 13, MIN_X_COORD, MAX_X_COORD), 
+    wall_seg(dir::HORI, 17, MIN_X_COORD, MAX_X_COORD), 
+    wall_seg(dir::HORI, 22, MIN_X_COORD, MAX_X_COORD), 
+    wall_seg(dir::VERT, 10, MIN_Y_COORD, 22), 
+    wall_seg(dir::VERT, 15, MIN_Y_COORD, MAX_Y_COORD), 
+    wall_seg(dir::VERT, 25, MIN_Y_COORD, MAX_Y_COORD), 
+    wall_seg(dir::VERT, 30, MIN_Y_COORD, MAX_Y_COORD), 
+    wall_seg(dir::VERT, 40, MIN_Y_COORD, MAX_Y_COORD), 
+    wall_seg(dir::VERT, 45, MIN_Y_COORD, MAX_Y_COORD), 
+    wall_seg(dir::VERT, 55, MIN_Y_COORD, MAX_Y_COORD), 
+    wall_seg(dir::VERT, 60, 13, MAX_Y_COORD), 
+    },
+    
+};
+
 // enum portal_type {
 //     SENDER1 = 0, 
 //     RECIEVER1 = 1, 
@@ -177,22 +250,22 @@ enum inc {
 //     RECIEVER3 = 5, 
 // };
 
-enum mp_i {
-    LVL1 = 0,
-    LVL2 = 0,
-    LVL3 = 0,
-};
+// enum mp_i {
+//     LVL1 = 0,
+//     LVL2 = 0,
+//     LVL3 = 0,
+// };
 
 
-struct map_el {
-    sp sprite_addr;
-    unsigned int x;
-    unsigned int y;
+// struct map_el {
+//     sp sprite_addr;
+//     unsigned int x;
+//     unsigned int y;
 
-    // Constructor to initialize the struct with values
-    map_el(sp addr, unsigned int x_val, unsigned int y_val)
-        : sprite_addr(addr), x(x_val), y(y_val) {}
-};
+//     // Constructor to initialize the struct with values
+//     map_el(sp addr, unsigned int x_val, unsigned int y_val)
+//         : sprite_addr(addr), x(x_val), y(y_val) {}
+// };
 
 // namespace mp {
 //     std::vector<map_el> LVL1 = {map_el(sp::WALL, 4, 4), };

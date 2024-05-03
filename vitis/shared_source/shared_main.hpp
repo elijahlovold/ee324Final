@@ -6,7 +6,6 @@
 * Usages: demo and verify display hardware works            *
 ************************************************************/
 #include "presets.hpp"
-#include "input_controller.hpp"
 #include "snake.hpp"
 #include "grid_controller.hpp"
 #include "time_controller.hpp"
@@ -42,31 +41,31 @@ int shared_main() {
     Timer::GTC_set_period((unsigned int)(period));    // set 1000ms period
 
     while (1) {
+        bool game_pause = false;
+        bool game_play = true;
+        bool btn_pressed = false;
 
-        // first, clear the grid
-        grid_controller::clear_grid();
+        // load the map selected by the switches...
+        grid_controller::load_map(io::get_switch_states() & 0b111);
         
-        // grid_controller::set_borders();
-
-        // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 7*4)) = 0x00000002;
-        // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 8*4)) = 0x22222222;
-        // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 5*4)) = 0x00000002;
-        // *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + 6*4)) = 0x00000002;
-
-        // // add side walls
-        // grid_controller::draw_wall_x(MIN_Y_COORD, 0, MAX_X_COORD);
-        // grid_controller::draw_wall_x(MAX_Y_COORD, 0, MAX_X_COORD);
-        // // center divider
-        grid_controller::draw_wall_x(15, MIN_X_COORD, MAX_X_COORD);
-        grid_controller::draw_wall_y((MAX_X_COORD - MIN_X_COORD)/2, MIN_Y_COORD, MAX_Y_COORD);
-        grid_controller::draw_wall_y((MAX_X_COORD - MIN_X_COORD)/2 + 5, MIN_Y_COORD, MAX_Y_COORD);
-
-
         // first, instantiate a snake object
         // will create in the center of the screen
         // create the snake starting with default length
-        Snake player1 (15, 15);
-        // Snake player2(45, 15);
+        Snake player1 (13, 31);
+        player1.head.direction = dir::HORI;
+        player1.head.increment = inc::POS;
+        player1.head.set_sprite(sp::HEAD_RIGHT);
+        player1.tail.set_sprite(sp::TAIL_RIGHT);
+
+        // always spawn in snake 1
+        player1.reset_snake();
+
+        Snake player2(58, 4);
+        player2.head.direction = dir::HORI;
+        player2.head.increment = inc::NEG;
+        player2.head.set_sprite(sp::HEAD_LEFT);
+        player2.tail.set_sprite(sp::TAIL_LEFT);
+        // spawn in player 2 when joined...
 
         // wait for player to start game while seeding random generator
         io::setup_SevenSeg(3);  // custom mode
@@ -74,11 +73,27 @@ int shared_main() {
         *((unsigned int *)SVN_SEG_DATA) = 0b00010010000001110010111100000111;
 
         unsigned int seed = 0;
-        // while (!io::get_button_states() && !player1.read_controller()) {
-        while (!io::get_button_states() && (uart::ps4_transfer(game_color) != 14)) {
+        unsigned char data = 0;
+        while (data != 14) {
+            uart::ps4_write(game_color);
+            uart::ps4_write(game_color);
+
+            data = uart::ps4_read();
+            uart::ps4_read();
+
             seed++;
+
+            if (io::get_button(3)) {
+                grid_controller::load_map(io::get_switch_states());
+
+                player1.reset_snake();
+                while (io::get_button(3) == 1) { 
+                    usleep (100);
+                }
+            }
         }
-        audio::play_audio(clip::PING); // output none
+        
+        audio::play_audio(clip::PING);
         srand(seed);
 
         io::setup_SevenSeg();   // back to normal mode
@@ -87,19 +102,21 @@ int shared_main() {
         // spawn the initial fruit on the map
         food::randomize();
 
-        bool game_pause = false;
-        bool game_play = true;
-        bool btn_pressed = false;
         while (game_play) {
             usleep(100);
 
-            // unsigned char data = controller::read_input(&player1);
-            unsigned char data = player1.read_controller(game_play);
-
-            if (data == CMDS::START) {
+            player1.ps4_write();
+            player2.ps4_write();
+            unsigned char data1 = uart::ps4_read();
+            unsigned char data2 = uart::ps4_read();
+            // can only pause if alive...
+            if ((player1.alive && data1 == CMDS::START) || (player2.alive && data2 == CMDS::START)) {
                 game_pause = !game_pause;
                 audio::play_audio(clip::PING);
             }
+
+            player1.decode_inputs(data1);
+            player2.decode_inputs(data2);
 
             if (!btn_pressed) {
                 if (io::get_button_states()&1) {
@@ -115,26 +132,47 @@ int shared_main() {
                 btn_pressed = false;
             }
 
+
             if (game_pause == false) {
                 food::check_food(); 
 
                 // if game update timer elapsed, increment player position
-                // switch 1 must be high to run the game
                 if (Timer::GTC_elapsed()) {
                     // display number of seconds played
-                    game_play = player1.step_snake();
-                }
-            }
-        }
-        
-        // end of game handler, display information...
-        uart::ps4_transfer(RGB(255,0,0), false);
+                    if (player1.alive) {
+                        player1.step_snake();
+                    }
 
+                    if (player2.alive) {
+                        player2.step_snake();
+                    }
+                }
+
+                
+                // combine scores onto seven seg
+                unsigned int combined = player1.head.food_eaten + 100*player2.head.food_eaten;
+                io::output_to_SevenSeg(combined);
+            }
+
+            // keep playing as long as one is alive
+            game_play = (player1.alive || player2.alive) && (io::get_button(3) != 1);
+        }
+        uart::ps4_write(RGB(255,0,0), false);
+        uart::ps4_write(RGB(255,0,0), false);
+        uart::ps4_read();
+        uart::ps4_read();
+         
+        // end of game handler, display information...
         audio::play_audio(clip::GAME_OVER); // output none
         io::setup_SevenSeg(3);  // custom mode
         // display "LOSE" on seven-seg
         *((unsigned int *)SVN_SEG_DATA) = 0b11000111110000001001001010000110;
         usleep(3000000);
+
+        uart::ps4_write(RGB(255,0,0), false);
+        uart::ps4_write(RGB(255,0,0), false);
+        uart::ps4_read();
+        uart::ps4_read();
     }
     return 0;
 }

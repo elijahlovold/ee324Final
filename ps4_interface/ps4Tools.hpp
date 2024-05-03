@@ -21,6 +21,9 @@ enum CMDS {
     PORTAL2 = 7, 
 
     START = 14,
+    MINUS = 15,
+
+    RANGE = 16,
 
     INC_COLOR = 18,
     DEC_COLOR = 19
@@ -54,24 +57,32 @@ void read_touch(int controller_id) {
     std::cout << "    ty: " << std::setw(7) << JslGetTouchY(controller_id) << std::endl;
 }
 
-unsigned char decode_general(int controller_id, input_mode &mode) {
+unsigned char decode_general(int controller_id, input_mode &mode, unsigned char *prev_cmd) {
     JOY_SHOCK_STATE info = JslGetSimpleState(controller_id);
 
     // buttons 
     if ((info.buttons & JSMASK_S) != 0) {    // x button
-        std::cout << "entering STICKS" << std::endl;
-        mode = STICKS;
-        return 1;
+       return 1;
     } else if ((info.buttons & JSMASK_W) != 0) {    // square button
-        std::cout << "entering PAD" << std::endl;
-        mode = PAD;
         return 2;
     } else if ((info.buttons & JSMASK_E) != 0) {    // circle button 
-        std::cout << "entering GYRO" << std::endl;
-        mode = GYRO;
-        return 3;
+        std::cout << int(*prev_cmd) << std::endl;
+        if (*prev_cmd == 3) {
+            return 3;
+        } else {
+            *prev_cmd = 3;
+
+            if (mode == STICKS) {
+                std::cout << "entering GYRO" << std::endl;
+                mode = GYRO;
+            } else {
+                std::cout << "entering STICKS" << std::endl;
+                mode = STICKS;
+            }
+            return 3;
+        }
     } else if ((info.buttons & JSMASK_N) != 0) {    // tri button 
-        return 4;
+        return CMDS::RANGE;
     }
 
     // bumpers and triggers
@@ -86,14 +97,17 @@ unsigned char decode_general(int controller_id, input_mode &mode) {
     }
     else if ((info.buttons & JSMASK_OPTIONS) != 0) {    // options button
         return CMDS::START;
+    } else if ((info.buttons & JSMASK_MINUS) != 0) {    // minus button
+        return CMDS::MINUS;
     }
+
 
     return 0;
 }
 
 
-unsigned char decode_sticks(int controller_id, input_mode &mode) {
-    unsigned char temp = decode_general(controller_id, mode);
+unsigned char decode_sticks(int controller_id, input_mode &mode, unsigned char *prev_cmd) {
+    unsigned char temp = decode_general(controller_id, mode, prev_cmd);
     if (temp != 0) {
         return temp;
     }
@@ -114,10 +128,6 @@ unsigned char decode_sticks(int controller_id, input_mode &mode) {
     // control
     else if ((info.buttons & JSMASK_HOME) != 0) {    // home button
         return 13;
-    } else if ((info.buttons & JSMASK_OPTIONS) != 0) {    // options button
-        return CMDS::START;
-    } else if ((info.buttons & JSMASK_MINUS) != 0) {    // minus button
-        return 15;
     } else if (JslGetTouchDown(controller_id)) {               // touchpad pressed
         return 16;
     }
@@ -146,8 +156,8 @@ unsigned char decode_sticks(int controller_id, input_mode &mode) {
     return 0;
 }
 
-unsigned char decode_gyro(int controller_id, input_mode &mode) {
-    unsigned char temp = decode_general(controller_id, mode);
+unsigned char decode_gyro(int controller_id, input_mode &mode, unsigned char *prev_cmd) {
+    unsigned char temp = decode_general(controller_id, mode, prev_cmd);
     if (temp != 0) {
         return temp;
     }  
@@ -168,8 +178,8 @@ unsigned char decode_gyro(int controller_id, input_mode &mode) {
     return 0;
 }
 
-unsigned char decode_pad(int controller_id, input_mode &mode) {
-    unsigned char temp = decode_general(controller_id, mode);
+unsigned char decode_pad(int controller_id, input_mode &mode, unsigned char *prev_cmd) {
+    unsigned char temp = decode_general(controller_id, mode, prev_cmd);
     if (temp != 0) {
         return temp;
     }

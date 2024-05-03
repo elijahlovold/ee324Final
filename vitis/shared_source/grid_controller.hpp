@@ -14,8 +14,12 @@ namespace grid_controller {
     bool draw_wall_x(unsigned int y, unsigned int x1, unsigned int x2);
     bool draw_wall_y(unsigned int x, unsigned int y1, unsigned int y2);
 
+    void load_map(int i);
 
     sp get_sprite(unsigned int x, unsigned int y) {
+        // mod by x by 64
+        x = x%64;
+
         unsigned int offset = y*REG_PER_ROW + (x >> 3);
 
         // grab the 32 bit sprite storing 4...
@@ -31,6 +35,8 @@ namespace grid_controller {
 
     // if check_collision, will return true if collision detected
     sp set_sprite(unsigned int x, unsigned int y, sp sprite_addr, bool check_collision) { 
+        x = x%64;
+
         unsigned int offset = y*REG_PER_ROW + (x >> 3);
 
         // grab the 32 bit sprite storing 4...
@@ -64,7 +70,7 @@ namespace grid_controller {
     // completely wipe the grid
     void clear_grid(sp addr){
         unsigned char addr_v = static_cast<unsigned char>(addr) & 0xF;
-        for (int i = 0; i < 264; i++) {
+        for (int i = 0; i < 288; i++) {
             unsigned int val = 0;
             for (int j = 0; j < 8; j++) {
                 val |= (addr_v << 4*j);
@@ -74,15 +80,24 @@ namespace grid_controller {
     }
 
     bool check_coords(unsigned int x, unsigned int y) {
-        return (x < MAX_X_COORD && y < MAX_Y_COORD);
+        return ((x >= MIN_X_COORD) && (x <= MAX_X_COORD) && (y >= MIN_Y_COORD) && (y <= MAX_Y_COORD));
+        // return (x < MAX_X_COORD && y < MAX_Y_COORD);
     } 
 
+    void draw_seg(wall_seg seg) {
+        if (seg.d == dir::HORI) {
+            draw_wall_x(seg.c, seg.b1, seg.b2);
+        } else {
+            draw_wall_y(seg.c, seg.b1, seg.b2);
+        }
+    }
+    
     bool draw_wall_x(unsigned int y, unsigned int x1, unsigned int x2) {
         for (int i = x1; i <= x2; i++) { 
             grid_controller::set_sprite(i, y, sp::WALL);
         }
     }
-    
+
     bool draw_wall_y(unsigned int x, unsigned int y1, unsigned int y2) {
         for (int i = y1; i <= y2; i++) { 
             grid_controller::set_sprite(x, i, sp::WALL);
@@ -96,4 +111,19 @@ namespace grid_controller {
         draw_wall_y(5, 0, MAX_Y_COORD);
     }
 
+    void load_map(int i) {
+        grid_controller::clear_grid();
+
+        // blank
+        if (i == 0) {
+            return;
+        }
+        
+        i = i % maps.size(); 
+        std::vector<wall_seg> selected_map = maps[i];
+
+        for (wall_seg seg : selected_map) {
+            draw_seg(seg);
+        }
+    }
 }

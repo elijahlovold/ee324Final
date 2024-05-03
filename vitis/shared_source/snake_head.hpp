@@ -125,7 +125,6 @@ class snake_head : public snake_node {
 
                     // increment the food eaten tracker
                     this->food_eaten++;
-                    io::output_to_SevenSeg(this->food_eaten);
 
                     // replace food with head
                     grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);

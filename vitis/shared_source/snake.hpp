@@ -10,7 +10,10 @@ class Snake {
     public:
         // static int num_instances;
 
+        unsigned int range;
+
         int instance;
+        bool alive;
 
         input_device dev;
 
@@ -27,16 +30,20 @@ class Snake {
         Snake(unsigned int x = 30, unsigned int y = 15, unsigned int length = SNAKE_LENGTH);
 
         // when deleted, decrement number of snakes
-        ~Snake() {
-            // Snake::num_instances--;
-        }        
+        // ~Snake() {
+        //     // Snake::num_instances--;
+        // }        
 
         void reset_snake();
+        void kill_snake();
+        void clear_snake();
+
         void set_direction(dir h_dir, inc np, snake_node &prev);
 
         bool step_snake();
 
-        unsigned char read_controller(bool game_state = true);
+        void ps4_write();
+        void decode_inputs(unsigned char data);
 
         void set_color();
         void inc_color();
@@ -46,7 +53,7 @@ class Snake {
 };
 
 Snake::Snake(unsigned int x, unsigned int y, unsigned int length) :
-    length(length), body_color_i(7), head(snake_head(dir::VERT, inc::NEG)), tail(snake_tail()) {
+    range(5), alive(false), length(length), body_color_i(7), head(snake_head(dir::VERT, inc::NEG)), tail(snake_tail()) {
 
     sp temp = grid_controller::get_sprite(0, 0);
 
@@ -63,18 +70,35 @@ Snake::Snake(unsigned int x, unsigned int y, unsigned int length) :
         this->s_x = 30;
         this->s_y = 15;
     }
+
     // initialize snake with all nodes in center and all sprites snake body...
     this->snake_body = std::vector<snake_node> (length, snake_node(sp::BODY));
 
-    // set the snake in the middle of the map
-    this->reset_snake();
-    
     // replace what was initially there...
     grid_controller::set_sprite(0, 0, temp);
     }
 
+// kill the snake
+void Snake::kill_snake() {
+    this->alive = false;
+}
+
+// clear the body
+void Snake::clear_snake() {
+    for (int i = 0; i < this->length; i++) {
+        this->snake_body[i].clear_node();
+    }
+
+    this->head.clear_node();
+    this->tail.clear_node();
+}
+
 // reset the snake to the initial conditions
 void Snake::reset_snake() {
+    this->clear_snake();
+
+    this->alive = true;
+
     // set the head
     this->head.move_node(this->s_x, this->s_y);
 
@@ -124,10 +148,10 @@ bool Snake::step_snake() {
     // need to see if food was eaten to tell if we should add a segment
     unsigned int prev_food = this->head.food_eaten;
 
-    bool ret = this->head.step_head();
+    bool step = this->head.step_head();
 
     // if successful and a food was eaten, grow snake
-    if (ret && (this->head.food_eaten > prev_food)) {
+    if (this->head.food_eaten > prev_food) {
         this->length++;
         this->snake_body.push_back(snake_node(sp::BODY, tail_x, tail_y));
         this->snake_body[length-1].set_sprite(sp::BODY);
@@ -135,55 +159,86 @@ bool Snake::step_snake() {
         this->tail.move_tail(tail_x, tail_y, dir_x, dir_y);
     }
 
-    return ret;
+    if (step == false) {
+        this->kill_snake();
+        return false;
+    }
+    return true;
 }
 
-unsigned char Snake::read_controller(bool game_state) {
-    // first, send over some info
-    unsigned char temp = uart::ps4_transfer(color_presets[this->body_color_i], game_state);
+void Snake::decode_inputs(unsigned char data) {
+    unsigned int x, y;
+    if (this->alive) {
+        switch (data) {
+            case CMDS::UP: 
+                this->set_direction(dir::VERT, inc::NEG, snake_body[0]);
+                break;
+            case CMDS::DOWN:
+                this->set_direction(dir::VERT, inc::POS, snake_body[0]);
+                break;
+            case CMDS::LEFT:
+                this->set_direction(dir::HORI, inc::NEG, snake_body[0]);
+                break;
+            case CMDS::RIGHT:
+                this->set_direction(dir::HORI, inc::POS, snake_body[0]);
+                break;
 
-    if (temp == 22) {
-        this->set_direction(dir::VERT, inc::NEG, snake_body[0]);
-    } else if (temp == 23) {
-        this->set_direction(dir::VERT, inc::POS, snake_body[0]);
-    } else if (temp == 21) {
-        this->set_direction(dir::HORI, inc::NEG, snake_body[0]);
-    } else if (temp == 20) {
-        this->set_direction(dir::HORI, inc::POS, snake_body[0]);
-    }
+            case 8: 
+                // first, compute destination
+                if (this->head.direction == HORI) {
+                    x = this->head.get_coords(0) + this->range*this->head.increment;   // shoot 5 tiles out
+                    y = this->head.get_coords(1);
+                } else {
+                    x = this->head.get_coords(0);
+                    y = this->head.get_coords(1) + this->range*this->head.increment;   // shoot 5 tiles out
+                } 
+                this->head.sender.shoot_portal(x, y);
+                break;
+            case 7: 
+                // first, compute destination
+                if (this->head.direction == HORI) {
+                    x = this->head.get_coords(0) + 7*this->head.increment;   // shoot 7 tiles out
+                    y = this->head.get_coords(1);
+                } else {
+                    x = this->head.get_coords(0);
+                    y = this->head.get_coords(1) + 7*this->head.increment;   // shoot 7 tiles out
+                } 
+                this->head.reciever.shoot_portal(x, y);
+                break;
 
-    else if (temp == 8) {  // assume portal1 shoot
-        // first, compute destination
-        unsigned int x, y;
-        if (this->head.direction == HORI) {
-            x = this->head.get_coords(0) + 5*this->head.increment;   // shoot 5 tiles out
-            y = this->head.get_coords(1);
-        } else {
-            x = this->head.get_coords(0);
-            y = this->head.get_coords(1) + 5*this->head.increment;   // shoot 5 tiles out
-        } 
-        this->head.sender.shoot_portal(x, y);
-    } else if (temp == 7) {  // assume portal2 shoot
-        // first, compute destination
-        unsigned int x, y;
-        if (this->head.direction == HORI) {
-            x = this->head.get_coords(0) + 7*this->head.increment;   // shoot 7 tiles out
-            y = this->head.get_coords(1);
-        } else {
-            x = this->head.get_coords(0);
-            y = this->head.get_coords(1) + 7*this->head.increment;   // shoot 7 tiles out
-        } 
-        this->head.reciever.shoot_portal(x, y);
-    } else if (temp > 0 && temp < 5) {
-        audio::play_audio(clip::PING);
-    }
+            case 3:
+                audio::play_audio(clip::PING);
+                break;
 
-    else if (temp == CMDS::INC_COLOR) {
-        this->inc_color(); 
-    } else if (temp == CMDS::DEC_COLOR) {
-        this->dec_color(); 
+            case CMDS::INC_COLOR:
+                this->inc_color(); 
+                break;
+            case CMDS::DEC_COLOR:
+                this->dec_color(); 
+                break;
+
+            case CMDS::RANGE: 
+                if (this->range == 5) {
+                    this->range = 2;
+                } else {
+                    this->range = 5;
+                }
+                audio::play_audio(clip::PING);
+                break;
+
+            default: 
+                break;
+        }
+    } else if (data == CMDS::START) {
+        this->reset_snake();
+    } else if (data == CMDS::MINUS) {
+        this->clear_snake();
     }
-    return temp;
+}
+
+void Snake::ps4_write() {
+    // uart::ps4_write(color_presets[this->body_color_i], this->alive);
+    uart::ps4_write(color_presets[this->body_color_i], true);
 }
 
 void Snake::set_color() {

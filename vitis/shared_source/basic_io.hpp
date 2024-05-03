@@ -39,6 +39,13 @@ namespace io {
         return button_states;
     }
 
+    bool get_button(unsigned int btn) {
+        if (btn > 3) {
+            return false;
+        }
+        unsigned int btns = get_button_states();
+        return (btns >> btn) & 1;
+    }
     /*************************************************************
      * Function: get_switch_states ()                            *
      * Date Created: January 20, 2023                            *

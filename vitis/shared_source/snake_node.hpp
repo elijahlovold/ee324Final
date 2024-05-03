@@ -1,7 +1,6 @@
 #pragma once
 
 #include "presets.hpp"
-#include "input_controller.hpp"
 #include "grid_controller.hpp"
 #include "portal.hpp"
 #include "basic_io.hpp"
@@ -15,6 +14,7 @@ class snake_node {
         bool set_coords(unsigned int x, unsigned int y);
         sp move_node(unsigned int x, unsigned int y, bool check_collision = false, bool replace = true);
         void set_sprite(sp sprite);
+        void clear_node();
 
         unsigned int get_coords(bool y) const;
         sp get_sprite() const;
@@ -42,7 +42,7 @@ sp snake_node::move_node(unsigned int x, unsigned int y, bool check_collision, b
         grid_controller::set_sprite(this->coord_x, this->coord_y, sp::TRANSPARENT);
     }
 
-    if (x > MAX_X_COORD || y > MAX_Y_COORD) {
+    if (x > MAX_X_COORD || x < MIN_X_COORD || y > MAX_Y_COORD || y < MIN_Y_COORD) {
         io::output_to_SevenSeg(234);    // error indication
         return sp::ERROR;
     } else {
@@ -51,7 +51,6 @@ sp snake_node::move_node(unsigned int x, unsigned int y, bool check_collision, b
     }
 
     return grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite, check_collision);
-    // return grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite, check_collision);
 }
 
 void snake_node::set_sprite(sp sprite) {
@@ -59,6 +58,10 @@ void snake_node::set_sprite(sp sprite) {
 
     // update the node on the grid
     grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
+}
+
+void snake_node::clear_node() {
+    grid_controller::set_sprite(this->coord_x, this->coord_y, sp::TRANSPARENT);
 }
 
 unsigned int snake_node::get_coords(bool y) const {
@@ -74,11 +77,8 @@ sp snake_node::get_sprite() const {
 }
 
 snake_node::snake_node(sp sprite, unsigned int x, unsigned int y) {
-    if (grid_controller::check_coords(x, y) == false) {
-        return;
-    } else {
-        this->coord_x = x;
-        this->coord_y = y;
-    }
+    // note, fine to spawn them outside bounds...
+    this->coord_x = x;
+    this->coord_y = y;
     this->node_sprite = sprite;
 }
