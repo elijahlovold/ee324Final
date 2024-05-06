@@ -2,12 +2,14 @@
 
 #include "presets.hpp"
 
+// audio control functions
 namespace audio {
-
+    // controls if audio can be played or not
     void enable_audio(bool on = true) {
         *((unsigned int *)(AUDIO_CONTROLLER_BASE_ADDR + 4)) = on;
     }
 
+    // play an audio clip
     void play_audio(clip cl) {
         unsigned char audio = static_cast<unsigned char>(cl);
 
@@ -21,8 +23,3 @@ namespace audio {
 
     }
 };
-	// // Add user logic here
-    // assign SOUNDCHOICE = slv_reg0[1:0];
-    // assign PLAY = slv_reg1[0];
-    // assign STOP = slv_reg2[0];
-	// // User logic ends

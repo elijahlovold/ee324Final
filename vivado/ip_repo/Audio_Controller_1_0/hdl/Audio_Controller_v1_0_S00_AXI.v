@@ -399,6 +399,7 @@
 	end    
 
 	// Add user logic here
+	// pipe regs out to control lines
     assign SOUNDCHOICE = slv_reg0[2:0];
     assign PLAY = slv_reg1[0];
     assign STOP = slv_reg2[0];

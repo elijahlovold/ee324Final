@@ -3,6 +3,18 @@
 
 Target is snake game with extra features including portals, teleporting fruit, and power ups. Additionally, multiple levels will be present in the game. 
 
+# codebase layout
+## Ps4 Interface 
+        • contains code to interface with ps4 controller and blackboard
+
+## vitis 
+        • shared_source contains all the source files
+        • shared_main is called from main.cpp in vitis project
+
+## vivado 
+        • shared_source contains all the modules
+        • ip_repo contains all AXI modules
+
 # Features to implement: 
 ##  Hardware 
         • Grid sprite controller - splits screen into grid where each element is an address to a sprite ROM
@@ -13,8 +25,19 @@ Target is snake game with extra features including portals, teleporting fruit, a
         • I/O interface - block to recieve user inputs from advanced I/O
     
 ##  Software 
-        • TBD
-         
+        • Snake node class
+        • Snake head -> inherits snake node
+        • Snake tail -> inherits snake node
+        • Snake -> contains a vector of snake nodes, tail, and head
+        • Portals 
+        • Food
+        • Maps
+        • Timer -> Use GTC 
+        • Grid controller 
+        • Audio controller
+        • Color controller 
+        • IO controller 
+        • UART controller
 
 ## Sprites
         • Head: UpHead, DownHead, LeftHead, RightHead, TurnRight, TurnLeft, TurnUp, TurnDown, HeadIntoPortal1 (4 angles), HeadOutPortal2 (4 angles)

@@ -3525,15 +3525,17 @@
 
 	// Add user logic here
 
+	// grab which reg should be selected
 	wire [2:0] REG_SEL;
 	assign REG_SEL = TILE_X >> 3;	// divide by 8
 	// note, first 3 regs are out of screen...
-	// reg [31:0] row0, row1, row2, row3, row4, 
 
+	// huge case statement to select correct row and reg within that row
+	// thank you vim for macros...
     always @(*) begin 
         if(TILE_Y[5] == 0) begin 	// lower row 
 			case (TILE_Y[4:0])
-				// note, first 3 rows are out of screen..
+				// note, first row is out of screen..
 				0 : case (REG_SEL) 
 					0 : SPRITE_ADDR <= slv_reg0;
 					1 : SPRITE_ADDR <= slv_reg1;
@@ -3856,54 +3858,53 @@
 				endcase
 			endcase
 		end 
-		else begin // upper row
-		case (TILE_Y[4:0])
-			0 : case (REG_SEL) 
-				0 : SPRITE_ADDR <= slv_reg256;
-				1 : SPRITE_ADDR <= slv_reg257;
-				2 : SPRITE_ADDR <= slv_reg258;
-				3 : SPRITE_ADDR <= slv_reg259;
-				4 : SPRITE_ADDR <= slv_reg260;
-				5 : SPRITE_ADDR <= slv_reg261;
-				6 : SPRITE_ADDR <= slv_reg262;
-				7 : SPRITE_ADDR <= slv_reg263;
+		else begin // upper half
+			case (TILE_Y[4:0])
+				0 : case (REG_SEL) 
+					0 : SPRITE_ADDR <= slv_reg256;
+					1 : SPRITE_ADDR <= slv_reg257;
+					2 : SPRITE_ADDR <= slv_reg258;
+					3 : SPRITE_ADDR <= slv_reg259;
+					4 : SPRITE_ADDR <= slv_reg260;
+					5 : SPRITE_ADDR <= slv_reg261;
+					6 : SPRITE_ADDR <= slv_reg262;
+					7 : SPRITE_ADDR <= slv_reg263;
+				endcase
+				1 : case (REG_SEL) 
+					0 : SPRITE_ADDR <= slv_reg264;
+					1 : SPRITE_ADDR <= slv_reg265;
+					2 : SPRITE_ADDR <= slv_reg266;
+					3 : SPRITE_ADDR <= slv_reg267;
+					4 : SPRITE_ADDR <= slv_reg268;
+					5 : SPRITE_ADDR <= slv_reg269;
+					6 : SPRITE_ADDR <= slv_reg270;
+					7 : SPRITE_ADDR <= slv_reg271;
+				endcase
+				2 : case (REG_SEL) 
+				0 : SPRITE_ADDR <= slv_reg272;
+				1 : SPRITE_ADDR <= slv_reg273;
+				2 : SPRITE_ADDR <= slv_reg274;
+				3 : SPRITE_ADDR <= slv_reg275;
+				4 : SPRITE_ADDR <= slv_reg276;
+				5 : SPRITE_ADDR <= slv_reg277;
+				6 : SPRITE_ADDR <= slv_reg278;
+				7 : SPRITE_ADDR <= slv_reg279;
+			endcase   		   		
+			3 : case (REG_SEL) 
+				0 : SPRITE_ADDR <= slv_reg280;
+				1 : SPRITE_ADDR <= slv_reg281;
+				2 : SPRITE_ADDR <= slv_reg282;
+				3 : SPRITE_ADDR <= slv_reg283;
+				4 : SPRITE_ADDR <= slv_reg284;
+				5 : SPRITE_ADDR <= slv_reg285;
+				6 : SPRITE_ADDR <= slv_reg286;
+				7 : SPRITE_ADDR <= slv_reg287;
 			endcase
-			1 : case (REG_SEL) 
-				0 : SPRITE_ADDR <= slv_reg264;
-				1 : SPRITE_ADDR <= slv_reg265;
-				2 : SPRITE_ADDR <= slv_reg266;
-				3 : SPRITE_ADDR <= slv_reg267;
-				4 : SPRITE_ADDR <= slv_reg268;
-				5 : SPRITE_ADDR <= slv_reg269;
-				6 : SPRITE_ADDR <= slv_reg270;
-				7 : SPRITE_ADDR <= slv_reg271;
-			endcase
-			2 : case (REG_SEL) 
-               0 : SPRITE_ADDR <= slv_reg272;
-               1 : SPRITE_ADDR <= slv_reg273;
-               2 : SPRITE_ADDR <= slv_reg274;
-               3 : SPRITE_ADDR <= slv_reg275;
-               4 : SPRITE_ADDR <= slv_reg276;
-               5 : SPRITE_ADDR <= slv_reg277;
-               6 : SPRITE_ADDR <= slv_reg278;
-               7 : SPRITE_ADDR <= slv_reg279;
-           endcase   		   		
-           3 : case (REG_SEL) 
-               0 : SPRITE_ADDR <= slv_reg280;
-               1 : SPRITE_ADDR <= slv_reg281;
-               2 : SPRITE_ADDR <= slv_reg282;
-               3 : SPRITE_ADDR <= slv_reg283;
-               4 : SPRITE_ADDR <= slv_reg284;
-               5 : SPRITE_ADDR <= slv_reg285;
-               6 : SPRITE_ADDR <= slv_reg286;
-               7 : SPRITE_ADDR <= slv_reg287;
-           endcase
-           default : SPRITE_ADDR <= 0;
 
-        endcase
+			default : SPRITE_ADDR <= 0;
+			endcase
 		end
 	end
-
 	// User logic ends
 
 	endmodule

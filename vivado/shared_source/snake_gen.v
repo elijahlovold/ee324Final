@@ -3,6 +3,7 @@
 module snake_gen(
     input [11:0] x, y,
     input clk,
+
     input [23:0] color0,
     input [23:0] color1,
     input [23:0] color2,
@@ -15,32 +16,25 @@ module snake_gen(
     input [31:0] sprite_addr, // to choose sprite from this file
     output [5:0] tile_x, tile_y,
 
+    // outputs, if snake is on and what color
     output snake_on, 
     output reg [23:0] snake_color
     );
 
-    // wire [11:0] offset_x, offset_y;
-    // assign offset_x = x - 192; // (H_SYNC_TIME + H_B_PORCH + H_LR_BORDER) 
-    // assign offset_y = y - 41;  // (V_SYNC_TIME + V_B_PORCH + V_LR_BORDER)
-
+    // each tile 32 bits, divide by 8 (>> 5)
     assign tile_x = x >> 5;
     assign tile_y = y >> 5;   
                      
     // Now we need to specify the sprite data.                            
     wire [95:0] spriteDATA; // The total number of columns of data        
     reg [2:0] spritePIX;                                                  
-    wire [8:0] spriteROW; //                                              
+    wire [8:0] spriteROW; 
     wire [4:0] spriteCOL;                                                 
     wire spritePIX_on;
-    
-    // wire [4:0] sprite_val;
-    // assign sprite_val = offset_x[7:5] << 2;
-    
-    // wire [3:0] sprite_fin;
-    // assign sprite_fin = sprite_addr[sprite_val +: 4];
 
-    // faster slicing
+    // sprite_fin determines which sprite to grab
     reg [3:0] sprite_fin;
+    // faster slicing then shifting index
     always @(*) begin
         case(x[7:5])
             0: sprite_fin = sprite_addr[3:0];
@@ -59,9 +53,6 @@ module snake_gen(
     
     // pull Sprite from .COE File
     blk_mem_gen_2 sprite(clk, spriteROW, spriteDATA);
-
-    // wire [4:0] flipped = ~x[4:0];
-    // assign spritePIX = spriteDATA[((flipped << 1) + flipped + 2) -: 3];
 
     // faster than mulitply by 3 and slicing...
    always @(*) begin
@@ -104,6 +95,7 @@ module snake_gen(
     // snake if on if one of the bits are high, i.e. number is not 0
     assign snake_on = spritePIX[0] | spritePIX[1] | spritePIX[2]; 
 
+    // finally, determine which color to pipe out
     always @(*) begin 
         case (spritePIX)
             0:  snake_color = color0; // transparent
@@ -116,8 +108,4 @@ module snake_gen(
             7:  snake_color = color7;
         endcase
     end
-
-
-
-
 endmodule

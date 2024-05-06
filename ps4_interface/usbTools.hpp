@@ -1,10 +1,6 @@
 // library for usb functionality
 #pragma once
 
-#define BOARD_ID "Patient_Sim_Board"
-
-// #include "global_constants.h"
-
 #include <string.h>
 #include <iostream> 
 #include <vector> 
@@ -15,7 +11,7 @@
 #include <devpkey.h>
 #include <WinIoCtl.h>
 
-
+// class for setting up serial coms on Windows USB
 class USBManager {
     private:
         HANDLE usb_handle = nullptr;
@@ -49,7 +45,6 @@ bool USBManager::AutoConnect(){
     CloseConnection();
 
     std::string device_target;
-    std::string board_id = BOARD_ID;
 
     HDEVINFO devices = SetupDiGetClassDevsA(&GUID_DEVINTERFACE_COMPORT, // GUID_DEVINTERFACE_COMPORT: retrieve comm ports 
                                             0,
@@ -169,7 +164,6 @@ bool USBManager::OpenConnection(std::string device){
 
 
 DWORD USBManager::write_raw(unsigned char* write_array, int num){
-
         DWORD bytes_transferred;						// number of bytes that have been transferred 
 		if (!(WriteFile(usb_handle, write_array, num, &bytes_transferred, nullptr))) {
 			std::cerr << "Error: Failed to send data.\n"; // if it failed, cerr out an error message 
@@ -180,7 +174,6 @@ DWORD USBManager::write_raw(unsigned char* write_array, int num){
 }
 
 DWORD USBManager::read_raw(unsigned char* read_array, int num){
-
         DWORD bytes_transferred;						// number of bytes that have been transferred 
 		if (!(ReadFile(usb_handle, read_array, num, &bytes_transferred, nullptr))) {
             std::cerr << " failed\n";

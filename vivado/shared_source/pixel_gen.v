@@ -20,14 +20,14 @@ module pixel_gen_temp (
     // output block
     always @(*) begin 
         if (~vde) begin
-            {R, G, B} = 24'h000000;
+            {R, G, B} = 24'h000000;         // nothing if outside displayable region
         end 
         else begin
             if(snake_on) begin
-                {R, G, B} = snake_color;
+                {R, G, B} = snake_color;    // if a pixel on the grid is on
             end
             else begin                   
-                {R, G, B} = 24'hFFFFFF;             // background  
+                {R, G, B} = 24'hFFFFFF;     // background  
             end 
         end
     end

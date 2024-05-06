@@ -5,8 +5,9 @@
 
 int color_presets[] = {0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF};
 
-int main () {
+// test file for testing dual controllers
 
+int main () {
 // connect to the ps4 controller
     int num = JslConnectDevices();
     std::cout << "number of devices: " << num << std::endl; 
@@ -28,5 +29,4 @@ int main () {
     }
 
     delete[] handle;
-     
 }

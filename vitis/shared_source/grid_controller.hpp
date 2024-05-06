@@ -1,9 +1,9 @@
 #pragma once
 
 #include "presets.hpp"
-#include "maps.hpp"
 #include "basic_io.hpp"
 
+// functions for interacting with the sprite grid
 namespace grid_controller {
     sp set_sprite(unsigned int x, unsigned int y, sp sprite_addr, bool check_collision = false); 
 
@@ -16,30 +16,40 @@ namespace grid_controller {
 
     void load_map(int i);
 
+
     sp get_sprite(unsigned int x, unsigned int y) {
+        // since only 8 registers per row (64 tiles) and 60 tiles + 6 out of bounds from h_sync, etc...
+        // reuse first few for the end of the screen since offscreen anyways 
         // mod by x by 64
         x = x%64;
 
+        // grab the offset 
         unsigned int offset = y*REG_PER_ROW + (x >> 3);
 
-        // grab the 32 bit sprite storing 4...
+        // grab the 32 bit sprite storing 8 tiles...
         unsigned int sprite = *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + offset*4));
 
-        // figure out which byte it is by mod 4
+        // figure out which byte it is by mod 8 
         unsigned int byte_position = (x % 8)*4;
 
+        // mask off existing sprite
         unsigned char existing_sprite = 0xF & (sprite >> byte_position);
 
+        // cast and return 
         return static_cast<sp>(existing_sprite);
     }
 
     // if check_collision, will return true if collision detected
     sp set_sprite(unsigned int x, unsigned int y, sp sprite_addr, bool check_collision) { 
+        // since only 8 registers per row (64 tiles) and 60 tiles + 6 out of bounds from h_sync, etc...
+        // reuse first few for the end of the screen since offscreen anyways 
+        // mod by x by 64 
         x = x%64;
 
+        // grab the offset 
         unsigned int offset = y*REG_PER_ROW + (x >> 3);
 
-        // grab the 32 bit sprite storing 4...
+        // grab the 32 bit sprite storing 8...
         unsigned int sprite = *((unsigned int *)(GRID_CONTROLLER_BASE_ADDR + offset*4));
 
         // since, sprite contains 4 elements, only want to set the correct one 
@@ -54,11 +64,14 @@ namespace grid_controller {
                 return static_cast<sp>(existing_sprite);
             }
         }
+        // else, set the sprite
 
-        // clear the byte to zeros
+        // clear the target nibble to zeros
         sprite &= ~(0xF << byte_position);
 
+        // convert desired sprite to char
         unsigned char sprite_addr_val = static_cast<unsigned char>(sprite_addr) & 0xF;
+        // or with existing to set
         sprite |= (sprite_addr_val << byte_position);
 
         // store the sprite_addr back into the register... 
@@ -69,6 +82,7 @@ namespace grid_controller {
 
     // completely wipe the grid
     void clear_grid(sp addr){
+        // loop through all registers setting them to desired addr
         unsigned char addr_v = static_cast<unsigned char>(addr) & 0xF;
         for (int i = 0; i < 288; i++) {
             unsigned int val = 0;
@@ -79,12 +93,14 @@ namespace grid_controller {
         }
     }
 
+    // check if x-y pair is in bounds
     bool check_coords(unsigned int x, unsigned int y) {
         return ((x >= MIN_X_COORD) && (x <= MAX_X_COORD) && (y >= MIN_Y_COORD) && (y <= MAX_Y_COORD));
-        // return (x < MAX_X_COORD && y < MAX_Y_COORD);
     } 
 
+    // draw a wall segment
     void draw_seg(wall_seg seg) {
+        // determine if its a horizontal or vertical wall
         if (seg.d == dir::HORI) {
             draw_wall_x(seg.c, seg.b1, seg.b2);
         } else {
@@ -92,25 +108,21 @@ namespace grid_controller {
         }
     }
     
+    // draw a horizontal wall
     bool draw_wall_x(unsigned int y, unsigned int x1, unsigned int x2) {
         for (int i = x1; i <= x2; i++) { 
             grid_controller::set_sprite(i, y, sp::WALL);
         }
     }
 
+    // draw a vertical wall
     bool draw_wall_y(unsigned int x, unsigned int y1, unsigned int y2) {
         for (int i = y1; i <= y2; i++) { 
             grid_controller::set_sprite(x, i, sp::WALL);
         }
     }
 
-    void set_borders() {
-        draw_wall_y(0, 0, MAX_Y_COORD);
-        draw_wall_y(2, 0, MAX_Y_COORD);
-        draw_wall_y(4, 0, MAX_Y_COORD);
-        draw_wall_y(5, 0, MAX_Y_COORD);
-    }
-
+    // load a preset map from index
     void load_map(int i) {
         grid_controller::clear_grid();
 
@@ -119,9 +131,12 @@ namespace grid_controller {
             return;
         }
         
+        // mod by map size to avoid errors on invalid access
         i = i % maps.size(); 
+        // select the map, is a vector of wall segments 
         std::vector<wall_seg> selected_map = maps[i];
 
+        // draw each wall segment
         for (wall_seg seg : selected_map) {
             draw_seg(seg);
         }

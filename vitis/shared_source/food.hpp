@@ -4,6 +4,8 @@
 #include "grid_controller.hpp"
 #include "time_controller.hpp"
 
+// controls food object
+// note, only one food on the map currently...
 namespace food {
     unsigned int x = 0;
     unsigned int y = 0;
@@ -11,11 +13,15 @@ namespace food {
     unsigned int period = 10;
     unsigned int elapsed = 0;
 
+    // function to randomize food position
     void randomize() {
+        // try placing food until success
         while (1) {
+            // get a random value between the max and min coords
             food::x = MIN_X_COORD + rand()%(MAX_X_COORD - MIN_X_COORD + 1);
             food::y = MIN_Y_COORD + rand()%(MAX_Y_COORD - MIN_Y_COORD + 1);
 
+            // attempt to set
             sp res = grid_controller::set_sprite(x, y, sp::FOOD, true);
 
             // will equal transparent if success
@@ -24,11 +30,15 @@ namespace food {
             }
         } 
 
+        // update the spawn time
         food::spawn_time = Timer::GTC_get_time_ms();
         food::elapsed = 0;
     }   
 
+    // check if food is expiring
     bool check_food() {
+        // if time is greater than period, increment elapsed time
+        // need to use this since GTC resets faster than food
         if (Timer::GTC_get_time_ms() - food::spawn_time > food::period) {
             food::spawn_time = 0;
             food::elapsed++;
@@ -38,8 +48,8 @@ namespace food {
         if (elapsed > 800) {
             // clear food
             grid_controller::set_sprite(x, y, sp::TRANSPARENT);    
-            audio::play_audio(clip::PORTAL_TRAVEL);
             // move
+            audio::play_audio(clip::PORTAL_TRAVEL);
             food::randomize();
 
             return true;

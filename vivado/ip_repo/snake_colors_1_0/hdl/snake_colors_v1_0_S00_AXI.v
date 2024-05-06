@@ -442,6 +442,7 @@
 	end    
 
 	// Add user logic here
+	// pipe regs out to colors
 	assign COLOR0 = slv_reg0[23:0];
 	assign COLOR1 = slv_reg1[23:0];
 	assign COLOR2 = slv_reg2[23:0];

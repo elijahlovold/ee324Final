@@ -4,28 +4,35 @@
 #include "snake_node.hpp"
 #include "audio_controller.hpp"
 
-// inherit from snake_node
+// head inherit from snake_node
 class snake_head : public snake_node {
     public: 
+        // head info
         dir direction;
         inc increment;
         unsigned int food_eaten;
 
+        // contains a sending and recieving portal
+        portal sender;
+        portal reciever; 
+ 
+        // constructor
         snake_head(dir dir_in, inc inc_in, int x = 0, int y = 0) : snake_node(sp::HEAD_UP, x, y), sender(sp::PORTALS), reciever(sp::PORTALR), 
                                                             food_eaten(0), direction(dir_in), increment(inc_in) {
+            // link the sender and reciever together
             this->sender.set_corresponding(&reciever);
             this->reciever.set_corresponding(&sender);
         }
 
-        portal sender;
-        portal reciever; 
- 
+        // set the direction of the head
         void set_direction(dir h_dir, inc np, snake_node prev) {
             // no need if same axis
             if (this->direction == h_dir) {
                 return; 
             }
             
+            // check if horizontal or vertical
+            // ...and check increment +/- and set correct sprite
             if (h_dir == dir::HORI) {
                 if (np == inc::POS) {
                     if (prev.coord_x > this->coord_x) {
@@ -52,11 +59,12 @@ class snake_head : public snake_node {
                 }
             }
 
-            // if successful, update
+            // if successful, update info
             this->direction = h_dir;
             this->increment = np; 
         }
 
+        // function to step the head
         // returns true unless invalid collision
         bool step_head() {
             // determine which direction to step in... 
@@ -67,13 +75,14 @@ class snake_head : public snake_node {
             }
         }
 
-
+        // move the head
         bool move_head(unsigned int x, unsigned int y) {
+            // move the node, check for collision
             sp collided_sprite = this->move_node(x, y, true, false);
-            // sp collided_sprite = grid_controller::set_sprite(x, y, this->node_sprite, true);
 
+            // determine what to do with the collision
             switch (collided_sprite) {
-                // if nothing, no collision
+                // if transparent, no collision
                 case sp::TRANSPARENT: {
                     return true;
                 } 
@@ -88,9 +97,9 @@ class snake_head : public snake_node {
                         return true;
                     }
 
-                    audio::play_audio(clip::PORTAL_TRAVEL);
                     // else, go through portal 
-                    
+                    audio::play_audio(clip::PORTAL_TRAVEL);
+
                     // grab the destination coords of reciever
                     unsigned int x, y;
                     x = this->reciever.x;
@@ -116,14 +125,16 @@ class snake_head : public snake_node {
                     }
                 }
 
+                // reciever should just be eaten
                 case sp::PORTALR: {
                     grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
                     this->reciever.set = false;
                     return true;
                 }
 
+                // eat the food
                 case sp::FOOD: {
-                    audio::play_audio(clip::CHOMP);  // output none
+                    audio::play_audio(clip::CHOMP);
 
                     // increment the food eaten tracker
                     this->food_eaten++;
@@ -138,11 +149,10 @@ class snake_head : public snake_node {
 
                 // same as above
                 case sp::FOOD_TEL: {
-                    audio::play_audio(clip::CHOMP);  // output none
+                    audio::play_audio(clip::CHOMP);
 
                     // increment the food eaten tracker
                     this->food_eaten++;
-                    io::output_to_SevenSeg(this->food_eaten);
 
                     // replace food with head
                     grid_controller::set_sprite(this->coord_x, this->coord_y, this->node_sprite);
@@ -158,5 +168,4 @@ class snake_head : public snake_node {
                 }
             }
         }
-
 };

@@ -9,10 +9,11 @@
 
 #define PERIOD 1000     // sets the period of the PWM
 
+// all the AXI addresses...
+
 #define GRID_CONTROLLER_BASE_ADDR 0x43C30000
 #define COLOR_CONTROLLER_BASE_ADDR 0x43C40000
 #define AUDIO_CONTROLLER_BASE_ADDR 0x43C50000
-
 
 #define BUTTONS_BASEADDR 0x41200000		// Base address of the Buttons 
 #define LED_BASEADDR     0x41210000		// Base address of LED IP
@@ -45,28 +46,34 @@
 #define R_1_PERIOD  0x43C00054
 #define R_1_WIDTH 	0x43C00058
 
-
 #define GTC_BASE_ADDR 0xF8F00000
 #define UART_BASE_ADDR 0xE0001000
 
+// max sprite allowed
 #define MAX_SPRITE_ADDR 45
 
+// resolution data of screen and sprite
 #define X_RES 1920
 #define Y_RES 1080
 #define SPRITE_RES 32
 
+// valid coords
 #define MAX_X_COORD 65
 #define MIN_X_COORD 6
 #define MAX_Y_COORD 34
 #define MIN_Y_COORD 1
 
+// registers per row of the screen
 #define REG_PER_ROW 8
 
+// initial snake length
 #define SNAKE_LENGTH 5
 
+// enum for all the valid sprites
 enum sp {
     TRANSPARENT = 0,
 
+    // snake sprites
     HEAD_UP = 1, 
     HEAD_DOWN = 3, 
     HEAD_LEFT = 4, 
@@ -79,6 +86,7 @@ enum sp {
     TAIL_RIGHT = 7, 
     TAIL_LEFT = 9, 
 
+    // map items
     FOOD = 10, 
     FOOD_TEL = 11, 
 
@@ -90,6 +98,7 @@ enum sp {
     ERROR = 999,
 };
 
+// enum for all the valid clips
 enum clip {
     NONE = 0,
     CHOMP = 1, 
@@ -99,6 +108,7 @@ enum clip {
     GAME_OVER = 5,
 };
 
+// struct for an RGB color
 struct RGB {
     unsigned char R;
     unsigned char G;
@@ -107,8 +117,8 @@ struct RGB {
     RGB(unsigned char r, unsigned char g, unsigned char b) : R(r), G(g), B(b) {}
 };
 
+// all the color presets
 #define NUM_COLORS 17
-// RGB color_presets[] = {RGB(255,0,0), RGB(0,255,0), RGB(0,0,255), RGB(255,255,0), RGB(255,0,255), RGB(0,255,255), RGB(150,0,255)};
 RGB color_presets[] = {
     RGB(255, 0, 0),     // Red
     RGB(220, 20, 60),     // Crimson
@@ -127,6 +137,8 @@ RGB color_presets[] = {
     RGB(148, 0, 211),   // Violet
     RGB(75, 0, 130),    // Indigo
 };
+
+// enum for all the valid ps4 controller commands
 enum CMDS {
     UP = 22,
     DOWN = 23, 
@@ -145,6 +157,7 @@ enum CMDS {
     DEC_COLOR = 19
 };
 
+// enum for all the color controls on the screen
 enum color {
     BODY_CORE = 1, 
     PUPIL = 2,
@@ -154,32 +167,42 @@ enum color {
     RECIEVE = 7,
 };
 
+// enum for all valid input devices
 enum input_device {
     CONTROLLER = 0, 
     BOARD = 1
 };
 
+// enum for all valid directions
 enum dir {
     HORI = 0,
     VERT = 1
 };
 
+// enum for increment directions
 enum inc {
     POS = 1,
     NEG = -1, 
 };
 
+// struct for a vertical or horizontal wall segment
 struct wall_seg {
     dir d;
     unsigned int c;
     unsigned int b1;
     unsigned int b2;
+
     wall_seg(dir d, unsigned int c, unsigned int b1, unsigned int b2) : d(d), c(c), b1(b1), b2(b2) {}
 };
 
-
+// vector of possible maps to play
+// maps get harder the further the index
+// each map is just a vector of wall segments
+// this implementation makes it very easy to add new maps
 std::vector<std::vector<wall_seg>> maps = {
+    // empty map
     {},
+
     {
     wall_seg(dir::VERT, 30, 4, 18), 
     wall_seg(dir::VERT, 40, 4, 18), 
@@ -187,16 +210,19 @@ std::vector<std::vector<wall_seg>> maps = {
     wall_seg(dir::VERT, 50, 22, 28), 
     wall_seg(dir::HORI, 28, 20, 50), 
     }, 
+
     {
     wall_seg(dir::HORI, 17, MIN_X_COORD, MAX_X_COORD), 
     wall_seg(dir::VERT, 35, MIN_Y_COORD, MAX_Y_COORD), 
     },
+
     {
     wall_seg(dir::HORI, 10, 15, 56), 
     wall_seg(dir::HORI, 25, 15, 56), 
     wall_seg(dir::VERT, 15, 10, 25), 
     wall_seg(dir::VERT, 56, 10, 25), 
     },
+
     {
     wall_seg(dir::HORI, 5, MIN_X_COORD, 34), 
     wall_seg(dir::HORI, 10, 35, MAX_X_COORD), 
@@ -205,6 +231,7 @@ std::vector<std::vector<wall_seg>> maps = {
     wall_seg(dir::HORI, 25, MIN_X_COORD, 34), 
     wall_seg(dir::HORI, 30, 35, MAX_X_COORD), 
     }, 
+
     {
     wall_seg(dir::HORI, 10, MIN_X_COORD, 15), 
     wall_seg(dir::HORI, 10, 56, MAX_X_COORD), 
@@ -217,12 +244,14 @@ std::vector<std::vector<wall_seg>> maps = {
     wall_seg(dir::HORI, 17, 34, 35), 
     wall_seg(dir::HORI, 18, 34, 35), 
     }, 
+
     {
     wall_seg(dir::HORI, 13, MIN_X_COORD, MAX_X_COORD), 
     wall_seg(dir::HORI, 22, MIN_X_COORD, MAX_X_COORD), 
     wall_seg(dir::VERT, 30, MIN_Y_COORD, MAX_Y_COORD), 
     wall_seg(dir::VERT, 40, MIN_Y_COORD, MAX_Y_COORD), 
     }, 
+
     {
     wall_seg(dir::HORI, 13, MIN_X_COORD, MAX_X_COORD), 
     wall_seg(dir::HORI, 17, MIN_X_COORD, MAX_X_COORD), 
@@ -238,39 +267,3 @@ std::vector<std::vector<wall_seg>> maps = {
     },
     
 };
-
-// enum portal_type {
-//     SENDER1 = 0, 
-//     RECIEVER1 = 1, 
-
-//     SENDER2 = 2, 
-//     RECIEVER2 = 3, 
-
-//     SENDER3 = 4, 
-//     RECIEVER3 = 5, 
-// };
-
-// enum mp_i {
-//     LVL1 = 0,
-//     LVL2 = 0,
-//     LVL3 = 0,
-// };
-
-
-// struct map_el {
-//     sp sprite_addr;
-//     unsigned int x;
-//     unsigned int y;
-
-//     // Constructor to initialize the struct with values
-//     map_el(sp addr, unsigned int x_val, unsigned int y_val)
-//         : sprite_addr(addr), x(x_val), y(y_val) {}
-// };
-
-// namespace mp {
-//     std::vector<map_el> LVL1 = {map_el(sp::WALL, 4, 4), };
-
-//     std::vector<map_el> LVL2 = {map_el(sp::WALL, 4, 4), };
-
-//     std::vector<map_el> LVL3 = {map_el(sp::WALL, 4, 4), };
-// };

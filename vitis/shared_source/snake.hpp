@@ -6,29 +6,38 @@
 #include "snake_tail.hpp"
 #include "colors.hpp"
 
+// snake player class
 class Snake {
     public:
-        // static int num_instances;
-
+        // sending portal range
         unsigned int range;
 
+        // player instance
         int instance;
+        // life status
         bool alive;
 
+        // input device - currently unimplemented
         input_device dev;
 
+        // snake length = snake_body.size()
         unsigned int length;
 
+        // initial x and y
         unsigned int s_x, s_y;
 
+        // body color index
         unsigned int body_color_i;
 
+        // vector of snake_node makes the body
         std::vector<snake_node> snake_body;
         snake_head head;
         snake_tail tail;
 
+        // constructor
         Snake(unsigned int x = 30, unsigned int y = 15, unsigned int length = SNAKE_LENGTH, int instance = 0);
 
+        // helpful functions
         void reset_snake();
         void kill_snake();
         void clear_snake();
@@ -50,14 +59,17 @@ class Snake {
 Snake::Snake(unsigned int x, unsigned int y, unsigned int length, int instance) :
     range(5), alive(false), length(length), body_color_i(7), head(snake_head(dir::VERT, inc::NEG)), tail(snake_tail()) {
 
+    // grab current 0,0 since it's default location of node initialization
+    // ...will have to reset after building snake
     sp temp = grid_controller::get_sprite(0, 0);
 
-    // this->instance = Snake:num_instances;
-    // Snake::num_instances++;
+    // set the instance
     this->instance = instance;
 
+    // set the color
     this->set_color();
 
+    // check if valid coords
     if (grid_controller::check_coords(x,y)) {
         this->s_x = x;
         this->s_y = y;
@@ -71,7 +83,7 @@ Snake::Snake(unsigned int x, unsigned int y, unsigned int length, int instance) 
 
     // replace what was initially there...
     grid_controller::set_sprite(0, 0, temp);
-    }
+}
 
 // kill the snake
 void Snake::kill_snake() {
@@ -81,17 +93,23 @@ void Snake::kill_snake() {
 
 // clear the body
 void Snake::clear_snake() {
+    // loop through and clear each body node
     for (int i = 0; i < this->length; i++) {
         this->snake_body[i].clear_node();
     }
 
+    // clear tail and head
     this->tail.clear_node();
+    this->head.clear_node();
 }
 
 // reset the snake to the initial conditions
 void Snake::reset_snake() {
+    // first clear the snake
     this->clear_snake();
     
+    // check which instance determines spawning location
+    // later, move this to a preset vector which is selected by index...
     if (this->instance == 1) {
         this->head.direction = dir::HORI;
         this->head.increment = inc::POS;
@@ -104,6 +122,7 @@ void Snake::reset_snake() {
         this->tail.node_sprite = sp::HEAD_LEFT;
     }
 
+    // set length
     this->length = SNAKE_LENGTH;
     sp temp = grid_controller::get_sprite(0, 0);
 
@@ -113,12 +132,13 @@ void Snake::reset_snake() {
     // replace what was initially there...
     grid_controller::set_sprite(0, 0, temp);
 
+    // set alive
     this->alive = true;
 
     // set the head
     this->head.move_node(this->s_x, this->s_y, false, false);
 
-    // determine the direction 
+    // determine the direction and move the nodes to correct location
     if (this->head.direction == dir::HORI) {
         // set the body
         for (unsigned int i = 0; i < this->length; i++) {
@@ -134,13 +154,16 @@ void Snake::reset_snake() {
         // set the tail
         this->tail.move_node(this->s_x, this->s_y - this->head.increment*(this->length + 1));
     }
-
 }
 
+// set the snake direction
+// need to pass in body joint connecting to head to determine which direction of 
+// ...head sprite to set
 void Snake::set_direction(dir h_dir, inc np, snake_node &prev) {
     this->head.set_direction(h_dir, np, prev);
 }
 
+// step the snake
 bool Snake::step_snake() {
     unsigned int tail_x, tail_y; 
     // 1. get target tail coords
@@ -164,6 +187,7 @@ bool Snake::step_snake() {
     // need to see if food was eaten to tell if we should add a segment
     unsigned int prev_food = this->head.food_eaten;
 
+    // step the head
     bool step = this->head.step_head();
     
     // if successful and a food was eaten, grow snake
@@ -175,6 +199,7 @@ bool Snake::step_snake() {
         this->tail.move_tail(tail_x, tail_y, dir_x, dir_y);
     }
 
+    // if unsuccessful, kill snake
     if (step == false) {
         this->kill_snake();
         return false;
@@ -182,10 +207,13 @@ bool Snake::step_snake() {
     return true;
 }
 
+// decode ps4 controller data
 void Snake::decode_inputs(unsigned char data) {
     unsigned int x, y;
     if (this->alive) {
+        // big switch for all the commands
         switch (data) {
+            // change the direction
             case CMDS::UP: 
                 this->set_direction(dir::VERT, inc::NEG, snake_body[0]);
                 break;
@@ -199,7 +227,8 @@ void Snake::decode_inputs(unsigned char data) {
                 this->set_direction(dir::HORI, inc::POS, snake_body[0]);
                 break;
 
-            case 8: 
+            // shoot a portal
+            case CMDS::PORTAL1: 
                 // first, compute destination
                 if (this->head.direction == HORI) {
                     x = this->head.get_coords(0) + this->range*this->head.increment;   // shoot 5 tiles out
@@ -210,7 +239,7 @@ void Snake::decode_inputs(unsigned char data) {
                 } 
                 this->head.sender.shoot_portal(x, y);
                 break;
-            case 7: 
+            case CMDS::PORTAL2: 
                 // first, compute destination
                 if (this->head.direction == HORI) {
                     x = this->head.get_coords(0) + 7*this->head.increment;   // shoot 7 tiles out
@@ -222,10 +251,12 @@ void Snake::decode_inputs(unsigned char data) {
                 this->head.reciever.shoot_portal(x, y);
                 break;
 
+            // changed controller setting should ping player
             case 3:
                 audio::play_audio(clip::PING);
                 break;
 
+            // change color
             case CMDS::INC_COLOR:
                 this->inc_color(); 
                 break;
@@ -233,6 +264,7 @@ void Snake::decode_inputs(unsigned char data) {
                 this->dec_color(); 
                 break;
 
+            // change portal range
             case CMDS::RANGE: 
                 if (this->range == 5) {
                     this->range = 2;
@@ -245,23 +277,27 @@ void Snake::decode_inputs(unsigned char data) {
             default: 
                 break;
         }
-    } else if (data == CMDS::START) {
+    } 
+    // only valid if snake is dead 
+    else if (data == CMDS::START) {
         this->reset_snake();
     } else if (data == CMDS::MINUS) {
         this->clear_snake();
     }
 }
 
+// write ps4 command to uart
 void Snake::ps4_write() {
-    // uart::ps4_write(color_presets[this->body_color_i], this->alive);
     uart::ps4_write(color_presets[this->body_color_i], true);
 }
 
+// set the snake color
 void Snake::set_color() {
     colors::set_color(color::BODY_CORE, color_presets[this->body_color_i]); 
     io::RGB_led(color_presets[this->body_color_i], this->instance);
 }
 
+// increment color
 void Snake::inc_color() {
     if (this->body_color_i == NUM_COLORS - 1) {
         this->body_color_i = 0;
@@ -271,6 +307,7 @@ void Snake::inc_color() {
     this->set_color();
 }
 
+// decrement color
 void Snake::dec_color() {
     if (this->body_color_i == 0) {
         this->body_color_i = NUM_COLORS - 1;

@@ -19,8 +19,9 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module sim();
 
+// test bench to get grid controller working...
+module sim();
     wire HS, VS, Vde;
     wire [11:0] x_vga, y_vga;
     reg clk, rst;

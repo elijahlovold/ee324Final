@@ -21,36 +21,43 @@ module play_audio(
     wire [7:0] GameOver_data;
     wire GameOver_pwm;
 
+    // controls if the audio should play or not
     wire chomp_on, place_on, travel_on, move_on, gameover_on;
 
+    // chomp
     audio_controller #(22706, 2158) control_chomp(clk, rst, play, chomp_addr, chomp_on);
     chomp_rom chomp(clk, chomp_addr, chomp_data);
     PWM pwm_chomp(clk, rst, chomp_data, chomp_pwm);
     
+    // portal place
     audio_controller #(20800, 3629) control_PortalPlace(clk, rst, play, PortalPlace_addr, place_on);
     PortalPlace_rom PortalPlace(clk, PortalPlace_addr, PortalPlace_data);
     PWM pwm_PortalPlace(clk, rst, PortalPlace_data, PortalPlace_pwm);
     
+    // portal travel 
     audio_controller #(22607, 8756) control_PortalTravel(clk, rst, play, PortalTravel_addr, travel_on);
     PortalTravel_rom PortalTravel(clk, PortalTravel_addr, PortalTravel_data);
     PWM pwm_PortalTravel(clk, rst, PortalTravel_data, PortalTravel_pwm);
     
+    // move / ping
     audio_controller #(22520, 4263) control_Move(clk, rst, play, Move_addr, move_on);
     Move_rom Move(clk, Move_addr, Move_data);
     PWM pwm_Move(clk, rst, Move_data, Move_pwm);
 
+    // game over
     audio_controller #(22653, 14170) control_GameOver(clk, rst, play, GameOver_addr, gameover_on);
     GameOver_rom GameOver(clk, GameOver_addr, GameOver_data);
     PWM pwm_GameOver(clk, rst, GameOver_data, GameOver_pwm);
     
+    // select which one to play
     always @ (posedge clk, posedge rst) begin
         if(rst) begin
             audio <= 0;
         end
         else begin
-            case (soundchoice)
-                0: audio <= 0; // Play nothing
-                1: audio <= chomp_pwm & chomp_on; // PWM modded output
+            case (soundchoice) // only play if signal is on
+                0: audio <= 0;                      // Play nothing
+                1: audio <= chomp_pwm & chomp_on;   // PWM modded output
                 2: audio <= PortalPlace_pwm & place_on;
                 3: audio <= PortalTravel_pwm & travel_on;
                 4: audio <= Move_pwm & move_on;
@@ -97,18 +104,23 @@ output reg count_en
 
 reg [15:0] count;
 
+// this plays the audio through once if the count_en is strobbed high then low
 always @ (posedge clk, posedge rst) begin
     if (rst) begin
         count <= 0;
         addr <= 0;
     end
     else begin
+        // play starts the audio track
         if (play) begin 
             count_en <= 1;
             count <= 0;
             addr <= 0;
         end
+
+        // once play is set low, start playing audio
         else 
+            // if enabled and not at end...
             if (count_en && (addr < DEPTH)) begin
                 count <= count + 1;
                 if (count >= VALUE) begin
@@ -116,6 +128,8 @@ always @ (posedge clk, posedge rst) begin
                     count <= 0;
                 end
             end
+
+            // else disable audio and reset
             else begin 
                 count <= 0;
                 addr <= 0;
